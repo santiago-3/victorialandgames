@@ -1,0 +1,58 @@
+.minesweeper {
+    border: 3px dashed #060;
+    border-radius: 8px;
+    padding: 10px;
+}
+.title-bar {
+    background-color: #000;
+    border-radius: 8px;
+    color: #ccc;
+    padding: 5px;
+    margin: 5px;
+}
+.game {
+    padding: 5px 5px 5px 0px;
+    border-radius: 5px;
+}
+.row {
+    display: flex;
+    margin-bottom: 8px;
+}
+.square {
+    width: 32px;
+    height: 32px;
+    margin-left: 8px;
+    border-radius: 10px;
+    background-color: #333;
+    box-shadow: inset -2px -2px 5px #ddd;
+    cursor: pointer;
+    font-weight: bold;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.square .display {
+    padding-left: 3px;
+}
+
+.square.revealed {
+    background-color: #aaa;
+    box-shadow: inset 3px 3px 5px #333;
+    cursor: default;
+}
+
+.square.hasMine {
+    /*background-color: #555;*/
+}
+
+.square img {
+    width: 24px;
+    height: 24px;
+}
+
+.mines-1 { color: #00b }
+.mines-2 { color: #060 }
+.mines-3 { color: #b00 }
+.mines-4 { color: #606 }
