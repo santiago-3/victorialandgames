@@ -43,19 +43,13 @@ function Minesweeper() {
     }, [])
 
     useEffect( () => {
-        console.log('rows length', rows.length)
         if (rows.length > 0) {
             let someSquaresNotRevealed = rows.some(row => row.some( square => !square.revealed && !square.hasFlag ))
-            console.log('are some', someSquaresNotRevealed)
             if (! someSquaresNotRevealed) {
                 setState(states.WON)
             }
         }
     }, [rows])
-
-    useEffect( () => {
-        console.log('state', state)
-    }, [state])
 
     let displayRows = rows.map( row => {
         let squares = row.map( (square) => {
@@ -71,6 +65,8 @@ function Minesweeper() {
                     e.preventDefault()
                     rightClicked(square.rowNum, square.squareNum)
                 }}
+                lost={square.lost}
+                gameOver={state === states.GAME_OVER}
             />
         })
         return (
@@ -114,6 +110,20 @@ function Minesweeper() {
         }))
     }
 
+    function setProperty(rowNum, squareNum, property, value) {
+        setRows( rows.map( (row, rowIndex) => {
+            if ( rowIndex === rowNum ) { 
+                return row.map( (square, sqIndex) => {
+                    if (squareNum === sqIndex) {
+                        square[property] = value
+                    }
+                    return square
+                })
+            }
+            return row
+        }))
+    }
+
     function getAbsoluteSorroundingPositions(rowNum, squareNum, mines) {
         return relativeSorroundingPositions.map( ([relRowNum, relSquareNum]) => {
             return [rowNum + relRowNum, squareNum + relSquareNum]
@@ -138,7 +148,7 @@ function Minesweeper() {
             }
         }
         else {
-            setRevealed(square.rowNum, square.squareNum)
+            setProperty(square.rowNum, square.squareNum, 'revealed', true)
         }
 
         if (!square.hasMine && square.sorroundingMines === 0){
@@ -158,7 +168,7 @@ function Minesweeper() {
                         history.push([rowNum, squareNum])
                     }
                     else if (!adjSquare.hasMine && adjSquare.sorroundingMines > 0) {
-                        setRevealed(rowNum, squareNum)
+                        setProperty(rowNum, squareNum, 'revealed', true)
                     }
                 }
             })
@@ -172,23 +182,10 @@ function Minesweeper() {
     }
 
 
-    function setRevealed(rowNum, squareNum) {
-        setRows( rows.map( (row, rowIndex) => {
-            if ( rowIndex === rowNum ) { 
-                return row.map( (square, sqIndex) => {
-                    if (squareNum === sqIndex) {
-                        square.revealed = true
-                    }
-                    return square
-                })
-            }
-            return row
-        }))
-    }
-
-    function gameOver() {
+    function gameOver(sRowNum, sSquareNum) {
+        setProperty(sRowNum, sSquareNum, 'lost', true)
         minePositions.forEach( ([rowNum, squareNum]) => {
-            setRevealed(rowNum, squareNum)
+            setProperty(rowNum, squareNum, 'revealed', true)
         })
         setState(states.GAME_OVER)
     }
@@ -205,7 +202,8 @@ function Minesweeper() {
                     hasMine:hasMine(rowNum, squareNum, minePositions),
                     sorroundingMines:countSourroundingMines(rowNum, squareNum, minePositions),
                     revealed: false,
-                    hasFlag: false
+                    hasFlag: false,
+                    lost: false
                 }
             })
             return squares
@@ -244,14 +242,6 @@ function selectMinePositions(totalMines, coordinates) {
         coordinates.splice(position, 1)
     }
     return mines
-}
-
-function sleep(milliseconds) {
-    const date = Date.now();
-    let currentDate = null;
-    do {
-        currentDate = Date.now();
-    } while (currentDate - date < milliseconds);
 }
 
 export default Minesweeper

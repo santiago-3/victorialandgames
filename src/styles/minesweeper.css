@@ -52,6 +52,15 @@
     height: 24px;
 }
 
+.hasMine img {
+    padding-top: 2px;
+    padding-left: 2px;
+}
+
+.square.lost{
+    background-color: #a55;
+}
+
 .mines-1 { color: #00b }
 .mines-2 { color: #060 }
 .mines-3 { color: #b00 }
