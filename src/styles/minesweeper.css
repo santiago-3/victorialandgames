@@ -33,6 +33,11 @@
     align-items: center;
 }
 
+.square:hover {
+    background-color: #444;
+    box-shadow: inset -2px -2px 5px #eee;
+}
+
 .square .display {
     padding-left: 3px;
 }
@@ -41,6 +46,11 @@
     background-color: #aaa;
     box-shadow: inset 3px 3px 5px #333;
     cursor: default;
+}
+
+.square.revealed:hover {
+    background-color: #aaa;
+    box-shadow: inset 3px 3px 5px #333;
 }
 
 .square.hasMine {

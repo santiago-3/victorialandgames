@@ -2,7 +2,7 @@ import '../../styles/minesweeper.css'
 import Square from './Square.js'
 import { useState, useEffect } from 'react'
 
-const relativeSorroundingPositions = [
+const relativeSurroundingPositions = [
     [-1,-1],
     [-1,0],
     [-1,1],
@@ -22,6 +22,11 @@ const states = {
     RUNNING: 0,
     WON: 1,
     GAME_OVER: 2
+}
+
+const properties = {
+    REVEALED: 'revealed',
+    LOST: 'lost'
 }
 
 function Minesweeper() {
@@ -57,7 +62,7 @@ function Minesweeper() {
                 rowNum={square.rowNum}
                 squareNum={square.squareNum}
                 hasMine={square.hasMine}
-                sorroundingMines={square.sorroundingMines}
+                surroundingMines={square.surroundingMines}
                 revealed={square.revealed}
                 hasFlag={square.hasFlag}
                 action={ () => { squareClicked(square.rowNum, square.squareNum) }}
@@ -91,7 +96,8 @@ function Minesweeper() {
     }
 
     function rightClicked(rowNum, squareNum) {
-        if (state == states.RUNNING) {
+        let square = rows[rowNum][squareNum]
+        if (state == states.RUNNING && !square.revealed) {
             toggleFlag(rowNum, squareNum)
         }
     }
@@ -124,16 +130,16 @@ function Minesweeper() {
         }))
     }
 
-    function getAbsoluteSorroundingPositions(rowNum, squareNum, mines) {
-        return relativeSorroundingPositions.map( ([relRowNum, relSquareNum]) => {
+    function getAbsoluteSurroundingPositions(rowNum, squareNum, mines) {
+        return relativeSurroundingPositions.map( ([relRowNum, relSquareNum]) => {
             return [rowNum + relRowNum, squareNum + relSquareNum]
         }).filter( ([row, sq]) => row > -1 && row < height && sq > -1 && sq < width )
     }
 
     function countSourroundingMines(rowNum, squareNum, mines) {
-        const absoluteSorroundingPositions = getAbsoluteSorroundingPositions(rowNum, squareNum, mines)
+        const absoluteSurroundingPositions = getAbsoluteSurroundingPositions(rowNum, squareNum, mines)
 
-        return absoluteSorroundingPositions.filter( ([rowNum, squareNum]) => {
+        return absoluteSurroundingPositions.filter( ([rowNum, squareNum]) => {
             return hasMine(rowNum, squareNum, mines)
         }).length
     }
@@ -148,13 +154,13 @@ function Minesweeper() {
             }
         }
         else {
-            setProperty(square.rowNum, square.squareNum, 'revealed', true)
+            setProperty(square.rowNum, square.squareNum, properties.REVEALED, true)
         }
 
-        if (!square.hasMine && square.sorroundingMines === 0){
-            let sorroundingPositions = getAbsoluteSorroundingPositions(sRowNum,sSquareNum)
+        if (!square.hasMine && square.surroundingMines === 0){
+            let surroundingPositions = getAbsoluteSurroundingPositions(sRowNum,sSquareNum)
 
-            sorroundingPositions.forEach( ([rowNum, squareNum]) => {
+            surroundingPositions.forEach( ([rowNum, squareNum]) => {
                 let adjSquare = rows[rowNum][squareNum]
 
                 let revealed = adjSquare.revealed
@@ -167,8 +173,8 @@ function Minesweeper() {
                         queue.push([rowNum, squareNum])
                         history.push([rowNum, squareNum])
                     }
-                    else if (!adjSquare.hasMine && adjSquare.sorroundingMines > 0) {
-                        setProperty(rowNum, squareNum, 'revealed', true)
+                    else if (!adjSquare.hasMine && adjSquare.surroundingMines > 0) {
+                        setProperty(rowNum, squareNum, properties.REVEALED, true)
                     }
                 }
             })
@@ -183,9 +189,9 @@ function Minesweeper() {
 
 
     function gameOver(sRowNum, sSquareNum) {
-        setProperty(sRowNum, sSquareNum, 'lost', true)
+        setProperty(sRowNum, sSquareNum, properties.LOST, true)
         minePositions.forEach( ([rowNum, squareNum]) => {
-            setProperty(rowNum, squareNum, 'revealed', true)
+            setProperty(rowNum, squareNum, properties.REVEALED, true)
         })
         setState(states.GAME_OVER)
     }
@@ -200,7 +206,7 @@ function Minesweeper() {
                     rowNum,
                     squareNum,
                     hasMine:hasMine(rowNum, squareNum, minePositions),
-                    sorroundingMines:countSourroundingMines(rowNum, squareNum, minePositions),
+                    surroundingMines:countSourroundingMines(rowNum, squareNum, minePositions),
                     revealed: false,
                     hasFlag: false,
                     lost: false

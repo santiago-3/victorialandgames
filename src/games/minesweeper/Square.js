@@ -1,4 +1,15 @@
-function Square({ rowNum, squareNum, hasMine, sorroundingMines, revealed, hasFlag, action, rightAction, lost, gameOver }) {
+function Square({
+        rowNum,
+        squareNum,
+        hasMine,
+        surroundingMines,
+        revealed,
+        hasFlag,
+        action,
+        rightAction,
+        lost,
+        gameOver
+    }) {
     let classes = ['square']
     let number = <></>
     let img = <></>
@@ -22,9 +33,9 @@ function Square({ rowNum, squareNum, hasMine, sorroundingMines, revealed, hasFla
             }
             img = <img src="/mine.png" />
         }
-        else if (sorroundingMines > 0){
-            number = <div class="display">{sorroundingMines}</div>
-            classes.push(`mines-${sorroundingMines}`)
+        else if (surroundingMines > 0){
+            number = <div class="display">{surroundingMines}</div>
+            classes.push(`mines-${surroundingMines}`)
         }
     }
     return (
