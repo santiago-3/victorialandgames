@@ -33,7 +33,7 @@
     align-items: center;
 }
 
-.square:hover {
+.game.running .square:hover {
     background-color: #444;
     box-shadow: inset -2px -2px 5px #eee;
 }
@@ -67,7 +67,7 @@
     padding-left: 2px;
 }
 
-.square.lost{
+.square.lost, .square.lost:hover{
     background-color: #a55;
 }
 
