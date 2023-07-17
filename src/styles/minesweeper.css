@@ -1,3 +1,4 @@
+button { cursor: pointer }
 .minesweeper {
     border: 3px dashed #060;
     border-radius: 8px;
@@ -10,6 +11,35 @@
     padding: 5px;
     margin: 5px;
 }
+
+.status-bar {
+    display: flex;
+    margin-bottom: 10px;
+    justify-content: center;
+}
+.status-bar > div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.param {
+    width: 80px;
+}
+
+.param label {
+    color: #ddd;
+}
+
+.param input {
+    width: 40px;
+    border-radius: 8px;
+    text-align: center;
+    border: none;
+    padding: 4px;
+    background-color: #ccc;
+}
+
 .game {
     padding: 5px 5px 5px 0px;
     border-radius: 5px;
@@ -36,6 +66,15 @@
 .game.running .square:hover {
     background-color: #444;
     box-shadow: inset -2px -2px 5px #eee;
+}
+
+.game.gameOver .square:hover {
+    cursor: default;
+}
+
+.game.running .square.revealed:hover {
+    background-color: #aaa;
+    box-shadow: inset 3px 3px 5px #333;
 }
 
 .square .display {

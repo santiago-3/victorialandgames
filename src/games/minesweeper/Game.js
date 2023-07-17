@@ -2,59 +2,56 @@ import '../../styles/minesweeper.css'
 import Square from './Square.js'
 import { useState, useEffect } from 'react'
 
-const height = 10
-const width = 20
-const totalMines = 32
+function Minesweeper({width, height, totalMines}) {
 
-const states = {
-    RUNNING: 'running',
-    WON: 'won',
-    GAME_OVER: 'gameOver'
-}
+    console.log('total mines', totalMines)
 
-const properties = {
-    REVEALED: 'revealed',
-    LOST: 'lost'
-}
-
-const relativeSurroundingPositions = [
-    [-1,-1],
-    [-1,0],
-    [-1,1],
-    [0,-1],
-    [0,1],
-    [1,-1],
-    [1,0],
-    [1,1],
-]
-
-const coordinates = Array.from( { length: height }, (_,i) => i ).map( rowNum => {
-    let squares = Array.from( { length: width }, (_,i) => i).map( squareNum => {
-        return [rowNum, squareNum]
-    })
-    return squares
-})
-
-const minePositions = selectMinePositions(totalMines)
-
-function selectMinePositions(totalMines) {
-    let mines = []
-
-    let flatCoordinates = coordinates.reduce( (acc, current) => {
-        return acc.concat(current)
-    }, [] )
-
-    for (let i=0; i<totalMines; i++) {
-        let position = Math.floor(Math.random() * flatCoordinates.length)
-        mines.push(flatCoordinates[position])
-        flatCoordinates.splice(position, 1)
+    const states = {
+        RUNNING: 'running',
+        WON: 'won',
+        GAME_OVER: 'gameOver'
     }
-    return mines
-}
 
-function Minesweeper() {
+    const properties = {
+        REVEALED: 'revealed',
+        LOST: 'lost'
+    }
 
-    let [ rows, setRows ] = useState( [] )
+    const relativeSurroundingPositions = [
+        [-1,-1],
+        [-1,0],
+        [-1,1],
+        [0,-1],
+        [0,1],
+        [1,-1],
+        [1,0],
+        [1,1],
+    ]
+
+    const coordinates = Array.from( { length: height }, (_,i) => i ).map( rowNum => {
+        let squares = Array.from( { length: width }, (_,i) => i).map( squareNum => {
+            return [rowNum, squareNum]
+        })
+        return squares
+    })
+
+    function selectMinePositions(totalMines) {
+        let mines = []
+
+        let flatCoordinates = coordinates.reduce( (acc, current) => {
+            return acc.concat(current)
+        }, [] )
+
+        for (let i=0; i<totalMines; i++) {
+            let position = Math.floor(Math.random() * flatCoordinates.length)
+            mines.push(flatCoordinates[position])
+            flatCoordinates.splice(position, 1)
+        }
+        return mines
+    }
+
+    let [ minePositions, _] = useState(selectMinePositions(totalMines))
+    let [ rows, setRows ]   = useState( [] )
     let [ state, setState ] = useState(states.RUNNING)
 
     useEffect( () => {
@@ -86,15 +83,20 @@ function Minesweeper() {
             })
             return squares
         }))
+        setState(states.RUNNING)
     }
 
     function squareClicked(rowNum, squareNum) {
+        console.log('clicked')
         if (state == states.RUNNING) {
+            console.log('running')
             let square = rows[rowNum][squareNum]
             if (square.hasFlag) {
+                console.log('has flag')
                 toggleFlag(rowNum, squareNum)
             }
             else {
+                console.log('not has flag')
                 let queue = [[rowNum, squareNum]]
                 let history = queue
                 revealRecursiveSquares(queue, history, true)
@@ -233,15 +235,8 @@ function Minesweeper() {
     })
 
     return (
-        <div class="minesweeper">
-            <div class="title-bar">
-                Mine sweeper
-            </div>
-            <div class="status-bar">
-            </div>
-            <div class={`game ${state}`}>
-                { displayRows }
-            </div>
+        <div class={`game ${state}`}>
+            { displayRows }
         </div>
     )
 }

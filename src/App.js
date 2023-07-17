@@ -1,5 +1,5 @@
 import './styles/App.css'
-import Minesweeper from './games/minesweeper/Game.js'
+import Minesweeper from './games/minesweeper/GameManager.js'
 
 function App() {
 return (
