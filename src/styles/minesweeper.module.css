@@ -1,6 +1,6 @@
 button { cursor: pointer }
 .minesweeper {
-    border: 3px dashed #060;
+    border: 3px dashed #006d00;
     border-radius: 8px;
     padding: 10px;
 }

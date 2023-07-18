@@ -1,13 +1,35 @@
 body {
     background-color: #444;
-    padding-top: 10px;
+    margin: 0px;
 }
 .App {
-  text-align: center;
-  height: 100%;
+    text-align: center;
+    height: 100%;
 }
 .content {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+nav {
+    background-color: #030;
+    margin-bottom: 20px;
+    padding: 5px;
+}
+nav ul {
+    margin: 0px;
+    display: flex;
+    list-style-type: none;
+}
+nav li {
+    padding: 10px;
+    border-radius: 8px;
+}
+nav li:hover {
+    background-color: #050;
+}
+nav a {
+    color: #eee;
+    text-decoration: none;
+    padding: 10px;
 }

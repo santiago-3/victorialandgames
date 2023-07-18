@@ -1,0 +1,31 @@
+.board {
+    border-top: 1px solid #aaa;
+    border-left: 1px solid #aaa;
+}
+
+.row {
+    display: flex;
+    border-bottom: 1px solid #aaa;
+}
+
+.row.border-bottom {
+    border-bottom: 3px solid #aaa;
+}
+
+.row.border-bottom:last-child {
+    border-bottom: 1px solid #aaa;
+}
+
+.square {
+    width: 50px;
+    height: 50px;
+    border-right: 1px solid #aaa;
+}
+
+.square.border-right {
+    border-right: 3px solid #aaa;
+}
+
+.square.border-right:last-child {
+    border-right: 1px solid #aaa;
+}

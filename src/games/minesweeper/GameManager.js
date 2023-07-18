@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Game from './Game.js'
+import styles from '../../styles/minesweeper.module.css'
 
 function GameManager() {
 
@@ -9,12 +10,12 @@ function GameManager() {
     let [gameKey, setGameKey]       = useState(1)
 
     return (
-        <div class="minesweeper">
-            <div class="title-bar">
+        <div class={styles.minesweeper}>
+            <div class={styles['title-bar']}>
                 Mine sweeper
             </div>
-            <div class="status-bar">
-                <div class="param">
+            <div class={styles['status-bar']}>
+                <div class={styles.param}>
                     <label>Width</label>
                     <input
                         type="text"
@@ -23,7 +24,7 @@ function GameManager() {
                         onChange={ (e) => { setWidth(e.target.value) }}
                     />
                 </div>
-                <div class="param">
+                <div class={styles.param}>
                     <label>Height</label>
                     <input
                         type="text"
@@ -32,7 +33,7 @@ function GameManager() {
                         onChange={ (e) => { setHeight(e.target.value) }}
                     />
                 </div>
-                <div class="param">
+                <div class={styles.param}>
                     <label>Mines</label>
                     <input
                         type="text"

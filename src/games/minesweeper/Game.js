@@ -1,4 +1,4 @@
-import '../../styles/minesweeper.css'
+import styles from '../../styles/minesweeper.module.css'
 import Square from './Square.js'
 import { useState, useEffect } from 'react'
 
@@ -228,14 +228,14 @@ function Minesweeper({width, height, totalMines}) {
             />
         })
         return (
-            <div class="row">
+            <div class={styles.row}>
                 { squares }
             </div>
         )
     })
 
     return (
-        <div class={`game ${state}`}>
+        <div class={`${styles.game} ${styles[state]}`}>
             { displayRows }
         </div>
     )

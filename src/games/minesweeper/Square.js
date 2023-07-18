@@ -1,3 +1,5 @@
+import styles from '../../styles/minesweeper.module.css'
+
 function Square({
         rowNum,
         squareNum,
@@ -10,32 +12,32 @@ function Square({
         lost,
         gameOver
     }) {
-    let classes = ['square']
+    let classes = [styles.square]
     let number = <></>
     let img = <></>
     if (hasFlag) {
         revealed = false
         if (gameOver && !hasMine){
-            classes.push('crossedFlag')
+            classes.push(styles.crossedFlag)
             img = <img src="/flag-crossed.png" />
         }
         else {
-            classes.push('hasFlag')
+            classes.push(styles.hasFlag)
             img = <img src="/flag.png" />
         }
     }
     if (revealed) {
-        classes.push('revealed')
+        classes.push(styles.revealed)
         if (hasMine) {
-            classes.push('hasMine')
+            classes.push(styles.hasMine)
             if (lost) {
-                classes.push('lost')
+                classes.push(styles.lost)
             }
             img = <img src="/mine.png" />
         }
         else if (surroundingMines > 0){
-            number = <div class="display">{surroundingMines}</div>
-            classes.push(`mines-${surroundingMines}`)
+            number = <div class={styles.display}>{surroundingMines}</div>
+            classes.push(styles[`mines-${surroundingMines}`])
         }
     }
     return (
