@@ -1,41 +1,40 @@
-// rename:
-//          Square -> Cell,
-//          Area -> Region
-//          Stick, Band
 import styles from '../../styles/sudoku.module.css'
 import { useState } from 'react'
-import Square from './Square.js'
+import Cell from './Cell.js'
 
 const animationDuration = 500
 
 function Game() {
 
     const coordinates = Array.from( { length: 9 }, (_,i) => i ).map( rowIndex => {
-        let squares = Array.from( { length: 9 }, (_,i) => i).map( colIndex => {
+        let cells = Array.from( { length: 9 }, (_,i) => i).map( colIndex => {
             return [rowIndex, colIndex]
         })
-        return squares
+        return cells
     })
 
+    const getRegionIndex = index => Math.ceil((index+1) / 3)
+
+    let [ selectedCellRemainings, setSelectedCellRemainings ] = useState([])
     let [ matrix, setMatrix ] = useState(coordinates.map( (row, rowIndex) => {
         return row.map( (_, colIndex) => {
             return {
-                areaY       : Math.ceil((rowIndex+1) / 3),
-                areaX       : Math.ceil((colIndex+1) / 3),
+                regionY       : getRegionIndex(rowIndex),
+                regionX       : getRegionIndex(colIndex),
                 rowIndex    : rowIndex,
                 colIndex    : colIndex,
                 value       : '',
                 highlighted : false,
                 remainingPerRow     : [1,2,3,4,5,6,7,8,9],
                 remainingPerCol     : [1,2,3,4,5,6,7,8,9],
-                remainingPerArea    : [1,2,3,4,5,6,7,8,9],
+                remainingPerRegion    : [1,2,3,4,5,6,7,8,9],
             }
         })
     }))
 
     function updateValue(rowIndex, colIndex, keyCode, focusTarget) {
         let value = null
-        let square = matrix[rowIndex][colIndex]
+        let cell = matrix[rowIndex][colIndex]
 
         if ([8,46,48,68].includes(keyCode)) {
             value = ""
@@ -45,8 +44,8 @@ function Game() {
             value = keyCode - 48
             const existsInRow    = numberExistsInRow(rowIndex, value, colIndex)
             const existsInColumn = numberExistsInColumn(colIndex, value, rowIndex)
-            const existsInArea   = numberExistsInArea(square.areaY, square.areaX, value, rowIndex, colIndex)
-            if (existsInRow || existsInColumn || existsInArea) {
+            const existsInRegion   = numberExistsInRegion(cell.regionY, cell.regionX, value, rowIndex, colIndex)
+            if (existsInRow || existsInColumn || existsInRegion) {
                 return
             }
         }
@@ -58,20 +57,37 @@ function Game() {
         focusTarget.blur()
 
         let tempMatrix = matrix
-        if (Number.isInteger(square.value) && value === "") {
-            tempMatrix = alterRowRemainings(matrix, rowIndex, square.value, true)
-            tempMatrix = alterColRemainings(tempMatrix, colIndex, square.value, true)
+        if (Number.isInteger(cell.value) && value === "") {
+            tempMatrix = alterRowRemainings(tempMatrix, rowIndex, cell.value, true)
+            tempMatrix = alterColRemainings(tempMatrix, colIndex, cell.value, true)
+            tempMatrix = alterRegionRemainings(tempMatrix, cell.regionY, cell.regionX, cell.value, true)
         }
-        else if (Number.isInteger(value) && square.value === "") {
-            tempMatrix = alterRowRemainings(matrix, rowIndex, value, false)
+        else if (Number.isInteger(value) && cell.value === "") {
+            tempMatrix = alterRowRemainings(tempMatrix, rowIndex, value, false)
             tempMatrix = alterColRemainings(tempMatrix, colIndex, value, false)
+            tempMatrix = alterRegionRemainings(tempMatrix, cell.regionY, cell.regionX, value, false)
+        }
+        else if (Number.isInteger(value) && Number.isInteger(cell.value)) {
+            // number to remove, add to remainings
+            tempMatrix = alterRowRemainings(tempMatrix, rowIndex, cell.value, true)
+            tempMatrix = alterColRemainings(tempMatrix, colIndex, cell.value, true)
+            tempMatrix = alterRegionRemainings(tempMatrix, cell.regionY, cell.regionX, cell.value, true)
+            // number to add, remove from remainings
+            tempMatrix = alterRowRemainings(tempMatrix, rowIndex, value, false)
+            tempMatrix = alterColRemainings(tempMatrix, colIndex, value, false)
+            tempMatrix = alterRegionRemainings(tempMatrix, cell.regionY, cell.regionX, value, false)
         }
 
         setProperty(tempMatrix, rowIndex, colIndex, 'value', value)
+        setSelectedCellRemainings(getRemainings(rowIndex,colIndex))
+    }
+
+    function cellSelected(rowIndex, colIndex) {
+        setSelectedCellRemainings(getRemainings(rowIndex,colIndex))
     }
 
     function numberExistsInRow(rowIndex, number, originalColIndex) {
-        let colIndex = matrix[rowIndex].findIndex( square => square.value === number)
+        let colIndex = matrix[rowIndex].findIndex( cell => cell.value === number)
         setProperty(matrix, rowIndex, colIndex, 'highlighted', true)
         if (colIndex !== originalColIndex) {
             setTimeout( () => { setProperty(matrix, rowIndex, colIndex, 'highlighted', false) }, animationDuration)
@@ -84,7 +100,7 @@ function Game() {
         let rowIndex = matrix.reduce( (acc,row) => {
             acc.push(row[colIndex])
             return acc
-        }, []).findIndex( square => square.value === number)
+        }, []).findIndex( cell => cell.value === number)
         setProperty(matrix, rowIndex, colIndex, 'highlighted', true)
         if (rowIndex !== originalRowIndex) {
             setTimeout( () => { setProperty(matrix, rowIndex, colIndex, 'highlighted', false) }, animationDuration)
@@ -93,21 +109,21 @@ function Game() {
         return rowIndex !== -1
     }
 
-    function numberExistsInArea(areaY, areaX, number, originalRowIndex, originalColIndex) {
-        let square = matrix.filter( (row, currentRowIndex) => {
-            let currentAreaY = Math.ceil((currentRowIndex+1) / 3)
-            return currentAreaY === areaY
+    function numberExistsInRegion(regionY, regionX, number, originalRowIndex, originalColIndex) {
+        let cell = matrix.filter( (row, currentRowIndex) => {
+            let currentRegionY = getRegionIndex(currentRowIndex+1)
+            return currentRegionY === regionY
         }).reduce( (acc, row) => {
-            return acc.concat(row.filter ( (square) => {
-                return square.areaX === areaX
+            return acc.concat(row.filter ( cell => {
+                return cell.regionX === regionX
             }))
-        }, []).find( square => square.value === number )
+        }, []).find( cell => cell.value === number )
 
-        if (!square){
+        if (!cell){
             return false
         }
 
-        let { rowIndex, colIndex } = square
+        let { rowIndex, colIndex } = cell
 
         setProperty(matrix, rowIndex, colIndex, 'highlighted', true)
         if (rowIndex !== originalRowIndex) {
@@ -119,19 +135,19 @@ function Game() {
     function alterRowRemainings(tempMatrix, rowIndex,  number, add = false) {
         return tempMatrix.map( (row, currentRowIndex) => {
             if (rowIndex === currentRowIndex){
-                return row.map( square => {
-                    const elementIndex = square.remainingPerRow.indexOf(number)
+                return row.map( cell => {
+                    const elementIndex = cell.remainingPerRow.indexOf(number)
                     if (elementIndex > -1){
                         if (!add) {
-                            square.remainingPerRow.splice(elementIndex, 1)
+                            cell.remainingPerRow.splice(elementIndex, 1)
                         }
                     }
                     else {
                         if (add) {
-                            square.remainingPerRow.push(number)
+                            cell.remainingPerRow.push(number)
                         }
                     }
-                    return square
+                    return cell
                 })
             }
             return row
@@ -140,50 +156,83 @@ function Game() {
 
     function alterColRemainings(tempMatrix, colIndex,  number, add = false) {
         return tempMatrix.map( (row) => {
-            return row.map( (square, currentColIndex) => {
+            return row.map( (cell, currentColIndex) => {
                 if (colIndex === currentColIndex){
-                    const elementIndex = square.remainingPerCol.indexOf(number)
+                    const elementIndex = cell.remainingPerCol.indexOf(number)
                     if (elementIndex > -1){
                         if (!add) {
-                            square.remainingPerCol.splice(elementIndex, 1)
+                            cell.remainingPerCol.splice(elementIndex, 1)
                         }
                     }
                     else {
                         if (add) {
-                            square.remainingPerCol.push(number)
+                            cell.remainingPerCol.push(number)
                         }
                     }
                 }
-                return square
+                return cell
             })
+        })
+    }
+
+    function alterRegionRemainings(tempMatrix, regionY, regionX,  number, add = false) {
+        return tempMatrix.map( (row, currentRowIndex) => {
+            if (regionY === getRegionIndex(currentRowIndex)) {
+                return row.map( (cell, currentColIndex) => {
+                    if (regionX === getRegionIndex(currentColIndex)){
+                        const elementIndex = cell.remainingPerRegion.indexOf(number)
+                        if (elementIndex > -1){
+                            if (!add) {
+                                cell.remainingPerRegion.splice(elementIndex, 1)
+                            }
+                        }
+                        else {
+                            if (add) {
+                                cell.remainingPerRegion.push(number)
+                            }
+                        }
+                    }
+                    return cell
+                })
+            }
+            return row
         })
     }
 
     function setProperty(tempMatrix, rowIndex, colIndex, property, value) {
         setMatrix( tempMatrix.map( (row, currentRowIndex) => {
             if ( rowIndex === currentRowIndex) {
-                return row.map( (square, currentColIndex) => {
+                return row.map( (cell, currentColIndex) => {
                     if (colIndex === currentColIndex) {
-                        square[property] = value
+                        cell[property] = value
                     }
-                    return square
+                    return cell
                 })
             }
             return row
         }))
     }
 
+    function getRemainings(rowIndex, colIndex) {
+        return [1,2,3,4,5,6,7,8,9].filter( number => {
+            return matrix[rowIndex][colIndex].remainingPerRow.includes(number)
+                && matrix[rowIndex][colIndex].remainingPerCol.includes(number)
+                && matrix[rowIndex][colIndex].remainingPerRegion.includes(number)
+        })
+    }
+
     let board = matrix.map( (row, rowIndex) => {
-        let displayRow = row.map( (square, colIndex) => {
-            return <Square
+        let displayRow = row.map( (cell, colIndex) => {
+            return <Cell
                 colIndex={colIndex}
                 rowIndex={rowIndex}
-                value={square.value}
-                highlighted={square.highlighted}
+                value={cell.value}
+                highlighted={cell.highlighted}
                 updateValue={updateValue}
-                remainingPerRow={square.remainingPerRow}
-                remainingPerCol={square.remainingPerCol}
-                remainingPerArea={square.remainingPerArea}
+                remainingPerRow={cell.remainingPerRow}
+                remainingPerCol={cell.remainingPerCol}
+                remainingPerRegion={cell.remainingPerRegion}
+                cellSelected={cellSelected}
             />
         })
         let classes = [styles.row]
@@ -196,10 +245,9 @@ function Game() {
     return (
         <div className={styles.sudoku}>
             <div className={styles.board}>
-                <div className={styles.line}>
-                    {board}         
-                </div>
+                {board}
             </div>
+            <div className={styles.info} >{ selectedCellRemainings.join(' ') }</div>
         </div>
     )
 }

@@ -1,16 +1,17 @@
 import styles from '../../styles/sudoku.module.css'
 
-function Square({
+function Cell({
     rowIndex,
     colIndex,
     value,
     highlighted,
     updateValue,
+    cellSelected,
     remainingPerRow,
     remainingPerCol,
-    remainingPerArea,
+    remainingPerRegion,
 }) {
-    let classes = [styles.square]
+    let classes = [styles.cell]
     if (highlighted) {
         classes.push(styles.highlighted)
     }
@@ -22,7 +23,7 @@ function Square({
         displayValue = [1,2,3,4,5,6,7,8,9].filter( number => {
             return remainingPerRow.includes(number)
                 && remainingPerCol.includes(number)
-                && remainingPerArea.includes(number)
+                && remainingPerRegion.includes(number)
         }).length
 
         classes.push(styles.empty)
@@ -31,11 +32,12 @@ function Square({
         <div className={classes.join(' ')}>
             <input
                 type="text"
-                onKeyUp={e => updateValue(rowIndex, colIndex, e.keyCode, e.target)}
+                onKeyUp={e => { updateValue(rowIndex, colIndex, e.keyCode, e.target) }}
+                onFocus={() => { cellSelected(rowIndex, colIndex) }}
                 value={displayValue}
             />
         </div>
     )
 }
 
-export default Square
+export default Cell

@@ -7,7 +7,7 @@ function MainMenu() {
                     <a href="/minesweeper">Mine Sweeper</a>
                 </li>
                 <li>
-                    <a href="/sudoku">Sudoku</a>
+                    <a href="/sudoku">Sudoku lab</a>
                 </li>
             </ul>
         </nav>
