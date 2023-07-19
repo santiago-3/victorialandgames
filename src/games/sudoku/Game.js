@@ -1,3 +1,7 @@
+// rename:
+//          Square -> Cell,
+//          Area -> Region
+//          Stick, Band
 import styles from '../../styles/sudoku.module.css'
 import { useState } from 'react'
 import Square from './Square.js'
@@ -13,7 +17,6 @@ function Game() {
         return squares
     })
 
-    let [ focusTarget, setFocusTarget ] = useState(null)
     let [ matrix, setMatrix ] = useState(coordinates.map( (row, rowIndex) => {
         return row.map( (_, colIndex) => {
             return {
@@ -23,11 +26,14 @@ function Game() {
                 colIndex    : colIndex,
                 value       : '',
                 highlighted : false,
+                remainingPerRow     : [1,2,3,4,5,6,7,8,9],
+                remainingPerCol     : [1,2,3,4,5,6,7,8,9],
+                remainingPerArea    : [1,2,3,4,5,6,7,8,9],
             }
         })
     }))
 
-    function updateValue(rowIndex, colIndex, keyCode) {
+    function updateValue(rowIndex, colIndex, keyCode, focusTarget) {
         let value = null
         let square = matrix[rowIndex][colIndex]
 
@@ -50,14 +56,25 @@ function Game() {
         }
 
         focusTarget.blur()
-        setProperty(rowIndex, colIndex, 'value', value)
+
+        let tempMatrix = matrix
+        if (Number.isInteger(square.value) && value === "") {
+            tempMatrix = alterRowRemainings(matrix, rowIndex, square.value, true)
+            tempMatrix = alterColRemainings(tempMatrix, colIndex, square.value, true)
+        }
+        else if (Number.isInteger(value) && square.value === "") {
+            tempMatrix = alterRowRemainings(matrix, rowIndex, value, false)
+            tempMatrix = alterColRemainings(tempMatrix, colIndex, value, false)
+        }
+
+        setProperty(tempMatrix, rowIndex, colIndex, 'value', value)
     }
 
     function numberExistsInRow(rowIndex, number, originalColIndex) {
         let colIndex = matrix[rowIndex].findIndex( square => square.value === number)
-        setProperty(rowIndex, colIndex, 'highlighted', true)
-        if (colIndex != originalColIndex) {
-            setTimeout( () => { setProperty(rowIndex, colIndex, 'highlighted', false) }, animationDuration)
+        setProperty(matrix, rowIndex, colIndex, 'highlighted', true)
+        if (colIndex !== originalColIndex) {
+            setTimeout( () => { setProperty(matrix, rowIndex, colIndex, 'highlighted', false) }, animationDuration)
         }
 
         return colIndex !== -1
@@ -68,9 +85,9 @@ function Game() {
             acc.push(row[colIndex])
             return acc
         }, []).findIndex( square => square.value === number)
-        setProperty(rowIndex, colIndex, 'highlighted', true)
-        if (rowIndex != originalRowIndex) {
-            setTimeout( () => { setProperty(rowIndex, colIndex, 'highlighted', false) }, animationDuration)
+        setProperty(matrix, rowIndex, colIndex, 'highlighted', true)
+        if (rowIndex !== originalRowIndex) {
+            setTimeout( () => { setProperty(matrix, rowIndex, colIndex, 'highlighted', false) }, animationDuration)
         }
 
         return rowIndex !== -1
@@ -92,15 +109,58 @@ function Game() {
 
         let { rowIndex, colIndex } = square
 
-        setProperty(rowIndex, colIndex, 'highlighted', true)
-        if (rowIndex != originalRowIndex) {
-            setTimeout( () => { setProperty(rowIndex, colIndex, 'highlighted', false) }, animationDuration)
+        setProperty(matrix, rowIndex, colIndex, 'highlighted', true)
+        if (rowIndex !== originalRowIndex) {
+            setTimeout( () => { setProperty(matrix, rowIndex, colIndex, 'highlighted', false) }, animationDuration)
         }
         return true
     }
 
-    function setProperty(rowIndex, colIndex, property, value) {
-        setMatrix( matrix.map( (row, currentRowIndex) => {
+    function alterRowRemainings(tempMatrix, rowIndex,  number, add = false) {
+        return tempMatrix.map( (row, currentRowIndex) => {
+            if (rowIndex === currentRowIndex){
+                return row.map( square => {
+                    const elementIndex = square.remainingPerRow.indexOf(number)
+                    if (elementIndex > -1){
+                        if (!add) {
+                            square.remainingPerRow.splice(elementIndex, 1)
+                        }
+                    }
+                    else {
+                        if (add) {
+                            square.remainingPerRow.push(number)
+                        }
+                    }
+                    return square
+                })
+            }
+            return row
+        })
+    }
+
+    function alterColRemainings(tempMatrix, colIndex,  number, add = false) {
+        return tempMatrix.map( (row) => {
+            return row.map( (square, currentColIndex) => {
+                if (colIndex === currentColIndex){
+                    const elementIndex = square.remainingPerCol.indexOf(number)
+                    if (elementIndex > -1){
+                        if (!add) {
+                            square.remainingPerCol.splice(elementIndex, 1)
+                        }
+                    }
+                    else {
+                        if (add) {
+                            square.remainingPerCol.push(number)
+                        }
+                    }
+                }
+                return square
+            })
+        })
+    }
+
+    function setProperty(tempMatrix, rowIndex, colIndex, property, value) {
+        setMatrix( tempMatrix.map( (row, currentRowIndex) => {
             if ( rowIndex === currentRowIndex) {
                 return row.map( (square, currentColIndex) => {
                     if (colIndex === currentColIndex) {
@@ -121,7 +181,9 @@ function Game() {
                 value={square.value}
                 highlighted={square.highlighted}
                 updateValue={updateValue}
-                setFocusTarget={setFocusTarget}
+                remainingPerRow={square.remainingPerRow}
+                remainingPerCol={square.remainingPerCol}
+                remainingPerArea={square.remainingPerArea}
             />
         })
         let classes = [styles.row]

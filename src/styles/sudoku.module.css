@@ -67,6 +67,10 @@
     animation-duration: 0.5s;
 }
 
+.square.empty input{
+    color: #aaa;
+}
+
 @keyframes highlight {
     from {
         background-color: #888;
