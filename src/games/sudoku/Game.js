@@ -1,6 +1,7 @@
 import styles from '../../styles/sudoku.module.css'
 import { useState } from 'react'
 import Cell from './Cell.js'
+import GameGenerator from './GameGenerator.js'
 
 const animationDuration = 500
 
@@ -55,7 +56,9 @@ function Game() {
             return
         }
 
-        focusTarget.blur()
+        if (focusTarget) {
+            focusTarget.blur()
+        }
 
         let tempMatrix = matrix
         if (Number.isInteger(cell.value) && value === "") {
@@ -323,12 +326,19 @@ function Game() {
     })
 
     return (
-        <div className={styles.sudoku}>
-            <div className={styles.board}>
-                {board}
+        <>
+            <div className={styles.sudoku}>
+                <div className={styles.board}>
+                    {board}
+                </div>
+                <div className={styles.info} >{ possibilitiesDisplay }</div>
             </div>
-            <div className={styles.info} >{ possibilitiesDisplay }</div>
-        </div>
+            <GameGenerator
+                matrix={matrix}
+                updateValue={updateValue}
+                getRemainings={getRemainings}
+            />
+        </>
     )
 }
 
