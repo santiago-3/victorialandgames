@@ -1,18 +1,9 @@
-.board {
-    box-shadow: 2px 2px 4px 0px #222;
-}
-
-
 .row {
     display: flex;
 }
 
 .row.border-bottom {
-    border-bottom: 3px solid #ccc;
-}
-
-.row.border-bottom:last-child {
-    border-bottom: none;
+    margin-bottom: 10px;
 }
 
 .cell {
@@ -24,11 +15,7 @@
 }
 
 .cell.border-right {
-    border-right: 3px solid #ccc;
-}
-
-.cell.border-right:last-child {
-    border-right: none;
+    margin-right: 10px;
 }
 
 .cell input {
@@ -43,22 +30,7 @@
     cursor: pointer;
     box-sizing: border-box;
     box-shadow: inset -3px -3px 4px 0px #ccc;
-}
-
-.row:first-child .cell:first-child input {
-    border-top-left-radius: 8px;
-}
-
-.row:first-child .cell:last-child input {
-    border-top-right-radius: 8px;
-}
-
-.row:last-child .cell:first-child input {
-    border-bottom-left-radius: 8px;
-}
-
-.row:last-child .cell:last-child input {
-    border-bottom-right-radius: 8px;
+    border-radius: 16px;
 }
 
 .cell input:hover {

@@ -15,6 +15,7 @@ function Game() {
 
     const getRegionIndex = index => Math.ceil((index+1) / 3)
 
+    let [ possibilities, setPossibilities ] = useState([])
     let [ selectedCellRemainings, setSelectedCellRemainings ] = useState([])
     let [ matrix, setMatrix ] = useState(coordinates.map( (row, rowIndex) => {
         return row.map( (_, colIndex) => {
@@ -44,7 +45,7 @@ function Game() {
             value = keyCode - 48
             const existsInRow    = numberExistsInRow(rowIndex, value, colIndex)
             const existsInColumn = numberExistsInColumn(colIndex, value, rowIndex)
-            const existsInRegion   = numberExistsInRegion(cell.regionY, cell.regionX, value, rowIndex, colIndex)
+            const existsInRegion = numberExistsInRegion(cell.regionY, cell.regionX, value, rowIndex, colIndex)
             if (existsInRow || existsInColumn || existsInRegion) {
                 return
             }
@@ -79,11 +80,13 @@ function Game() {
         }
 
         setProperty(tempMatrix, rowIndex, colIndex, 'value', value)
-        setSelectedCellRemainings(getRemainings(rowIndex,colIndex))
+        setSelectedCellRemainings(getRemainings(matrix[rowIndex][colIndex]))
     }
 
     function cellSelected(rowIndex, colIndex) {
-        setSelectedCellRemainings(getRemainings(rowIndex,colIndex))
+        let remainings = getRemainings(matrix[rowIndex][colIndex])
+        setSelectedCellRemainings(remainings)
+        setPossibilities(getPossibilitiesForSelected(remainings, matrix[rowIndex][colIndex]))
     }
 
     function numberExistsInRow(rowIndex, number, originalColIndex) {
@@ -111,7 +114,7 @@ function Game() {
 
     function numberExistsInRegion(regionY, regionX, number, originalRowIndex, originalColIndex) {
         let cell = matrix.filter( (row, currentRowIndex) => {
-            let currentRegionY = getRegionIndex(currentRowIndex+1)
+            let currentRegionY = getRegionIndex(currentRowIndex)
             return currentRegionY === regionY
         }).reduce( (acc, row) => {
             return acc.concat(row.filter ( cell => {
@@ -213,11 +216,83 @@ function Game() {
         }))
     }
 
-    function getRemainings(rowIndex, colIndex) {
+    function getRemainings(cell) {
         return [1,2,3,4,5,6,7,8,9].filter( number => {
-            return matrix[rowIndex][colIndex].remainingPerRow.includes(number)
-                && matrix[rowIndex][colIndex].remainingPerCol.includes(number)
-                && matrix[rowIndex][colIndex].remainingPerRegion.includes(number)
+            return cell.remainingPerRow.includes(number)
+                && cell.remainingPerCol.includes(number)
+                && cell.remainingPerRegion.includes(number)
+        })
+    }
+
+    function getPossibilitiesForSelected(remainings, cell) {
+        return remainings.map( number => {
+            let row = JSON.parse(JSON.stringify(matrix[cell.rowIndex]))
+            let col = JSON.parse(JSON.stringify(matrix.map( currentRow => {
+                return currentRow[cell.colIndex]
+            })))
+            let region = JSON.parse(JSON.stringify(matrix.reduce( (acc, currentRow) => {
+                return acc.concat(currentRow.filter( currentCell => {
+                    return currentCell.rowIndex !== cell.rowIndex
+                        && currentCell.colIndex !== cell.colIndex
+                        && currentCell.regionY === cell.regionY
+                        && currentCell.regionX === cell.regionX
+                }))
+            }), []))
+
+            let alteredRow = row.filter( currentCell => {
+                return currentCell.value === '' && (currentCell.rowIndex !== cell.rowIndex || currentCell.colIndex !== cell.colIndex)
+            }).map( cell => {
+                const elementIndex = cell.remainingPerRow.indexOf(number)
+                if (elementIndex > -1){
+                    cell.remainingPerRow.splice(elementIndex, 1)
+                }
+                else {
+                    cell.remainingPerRow.push(number)
+                }
+                return cell
+            })
+
+            let alteredCol = col.filter( currentCell => {
+                return currentCell.value === '' && (currentCell.rowIndex !== cell.rowIndex || currentCell.colIndex !== cell.colIndex)
+            }).map( cell => {
+                const elementIndex = cell.remainingPerRow.indexOf(number)
+                if (elementIndex > -1){
+                    cell.remainingPerRow.splice(elementIndex, 1)
+                }
+                else {
+                    cell.remainingPerRow.push(number)
+                }
+                return cell
+            })
+
+            let alteredRegion = region.filter( currentCell => {
+                return currentCell.value === ''
+            }).map( cell => {
+                const elementIndex = cell.remainingPerRow.indexOf(number)
+                if (elementIndex > -1){
+                    cell.remainingPerRow.splice(elementIndex, 1)
+                }
+                else {
+                    cell.remainingPerRow.push(number)
+                }
+                return cell
+            })
+
+            let allRelatedCells = alteredRow.concat(alteredCol.concat(alteredRegion))
+
+            let smaller = allRelatedCells.reduce ( (acc, currentCell) => {
+                let remainingsLength = getRemainings(currentCell).length
+                if (remainingsLength < acc) {
+                    return remainingsLength
+                }
+                return acc
+            }, 9)
+
+            let sum = allRelatedCells.reduce ( (acc, currentCell) => {
+                return acc + getRemainings(currentCell).length
+            }, 0)
+
+            return { number, smaller, sum }
         })
     }
 
@@ -233,6 +308,7 @@ function Game() {
                 remainingPerCol={cell.remainingPerCol}
                 remainingPerRegion={cell.remainingPerRegion}
                 cellSelected={cellSelected}
+                possibilities={possibilities}
             />
         })
         let classes = [styles.row]
@@ -242,12 +318,16 @@ function Game() {
         return <div className={classes.join(' ')}>{displayRow}</div>
     })
 
+    let possibilitiesDisplay = possibilities.map( pos => {
+        return <div>{`${pos.number}: Smaller: ${pos.smaller}, Sum: ${pos.sum}`}</div>
+    })
+
     return (
         <div className={styles.sudoku}>
             <div className={styles.board}>
                 {board}
             </div>
-            <div className={styles.info} >{ selectedCellRemainings.join(' ') }</div>
+            <div className={styles.info} >{ possibilitiesDisplay }</div>
         </div>
     )
 }
