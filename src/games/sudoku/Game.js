@@ -337,6 +337,7 @@ function Game() {
                 matrix={matrix}
                 updateValue={updateValue}
                 getRemainings={getRemainings}
+                getPossibilitiesForSelected={getPossibilitiesForSelected}
             />
         </>
     )

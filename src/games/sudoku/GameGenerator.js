@@ -1,6 +1,6 @@
 import {  useState, useEffect } from 'react'
 
-function GameGenerator({matrix, updateValue, getRemainings}) {
+function GameGenerator({matrix, updateValue, getRemainings, getPossibilitiesForSelected}) {
 
     let [started, setStarted] = useState(false)
 
@@ -20,30 +20,37 @@ function GameGenerator({matrix, updateValue, getRemainings}) {
             }
             return acc
         }, 9)
-        console.log(smallerValue)
-
-        console.log('smaller value', smallerValue)
 
         const candidateCells = cells.filter( cell => {
             let remainingsLength = getRemainings(cell).length
             return remainingsLength === smallerValue && cell.value === ''
         })
 
-        if (smallerValue == 2) {
-            return
-        }
-
         if(candidateCells.length > 0) {
             const selectedCellIndex = Math.floor(Math.random() * (candidateCells.length-1))
 
             const selectedCell = candidateCells[selectedCellIndex]
             const selectedCellRemainings = getRemainings(selectedCell)
-            const newValueIndex = Math.floor(Math.random() * (selectedCellRemainings.length-1))
-            const newValue = selectedCellRemainings[newValueIndex]
+
+            const possibilitiesForSelected = getPossibilitiesForSelected(selectedCellRemainings, selectedCell)
+
+            const highestSmallest = possibilitiesForSelected.reduce( (acc, pos) => {
+                if (pos.smaller > acc) {
+                    return pos.smaller
+                }
+                return acc
+            }, 0)
+
+            const candidatesWithHighestSmaller = possibilitiesForSelected.filter( pos => {
+                return pos.smaller === highestSmallest
+            }).map( ({number}) => number)
+
+            const newValueIndex = Math.floor(Math.random() * (candidatesWithHighestSmaller.length-1))
+            const newValue = candidatesWithHighestSmaller[newValueIndex]
 
             updateValue(selectedCell.rowIndex, selectedCell.colIndex, 48 + newValue, null)
 
-            setTimeout(() => { generateNextStep() }, 400)
+            setTimeout(() => { generateNextStep() }, 100)
         }
         else {
             console.log('finished')
