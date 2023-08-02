@@ -18,25 +18,28 @@ function Game() {
 
     let [ possibilities, setPossibilities ] = useState([])
     let [ selectedCellRemainings, setSelectedCellRemainings ] = useState([])
-    let [ matrix, setMatrix ] = useState(coordinates.map( (row, rowIndex) => {
-        return row.map( (_, colIndex) => {
-            return {
-                regionY       : getRegionIndex(rowIndex),
-                regionX       : getRegionIndex(colIndex),
-                rowIndex    : rowIndex,
-                colIndex    : colIndex,
-                value       : '',
-                highlighted : false,
-                remainingPerRow     : [1,2,3,4,5,6,7,8,9],
-                remainingPerCol     : [1,2,3,4,5,6,7,8,9],
-                remainingPerRegion    : [1,2,3,4,5,6,7,8,9],
-            }
+    let [ matrix, setMatrix ] = useState(getCleanMatrix())
+
+    function getCleanMatrix() {
+        return coordinates.map( (row, rowIndex) => {
+            return row.map( (_, colIndex) => {
+                return {
+                    regionY     : getRegionIndex(rowIndex),
+                    regionX     : getRegionIndex(colIndex),
+                    rowIndex    : rowIndex,
+                    colIndex    : colIndex,
+                    value       : '',
+                    highlighted : false,
+                    remainingPerRow     : [1,2,3,4,5,6,7,8,9],
+                    remainingPerCol     : [1,2,3,4,5,6,7,8,9],
+                    remainingPerRegion  : [1,2,3,4,5,6,7,8,9],
+                }
+            })
         })
-    }))
+    }
 
     function updateValue(rowIndex, colIndex, keyCode, focusTarget) {
         let value = null
-        let cell = matrix[rowIndex][colIndex]
 
         if ([8,46,48,68].includes(keyCode)) {
             value = ""
@@ -44,12 +47,6 @@ function Game() {
 
         if (keyCode > 48 && keyCode < 58) {
             value = keyCode - 48
-            const existsInRow    = numberExistsInRow(rowIndex, value, colIndex)
-            const existsInColumn = numberExistsInColumn(colIndex, value, rowIndex)
-            const existsInRegion = numberExistsInRegion(cell.regionY, cell.regionX, value, rowIndex, colIndex)
-            if (existsInRow || existsInColumn || existsInRegion) {
-                return
-            }
         }
 
         if (value === null) {
@@ -60,7 +57,24 @@ function Game() {
             focusTarget.blur()
         }
 
-        let tempMatrix = matrix
+        let tempMatrix = getUpdatedMatrix(matrix, rowIndex, colIndex, value)
+
+        setMatrix(tempMatrix)
+        setSelectedCellRemainings(getRemainings(matrix[rowIndex][colIndex]))
+    }
+
+    function getUpdatedMatrix(tempMatrix, rowIndex, colIndex, value) {
+
+        let cell = matrix[rowIndex][colIndex]
+
+        const existsInRow    = numberExistsInRow(tempMatrix, rowIndex, value, colIndex)
+        const existsInColumn = numberExistsInColumn(tempMatrix, colIndex, value, rowIndex)
+        const existsInRegion = numberExistsInRegion(tempMatrix, cell.regionY, cell.regionX, value, rowIndex, colIndex)
+
+        if (existsInRow || existsInColumn || existsInRegion) {
+            return tempMatrix
+        }
+
         if (Number.isInteger(cell.value) && value === "") {
             tempMatrix = alterRowRemainings(tempMatrix, rowIndex, cell.value, true)
             tempMatrix = alterColRemainings(tempMatrix, colIndex, cell.value, true)
@@ -82,8 +96,8 @@ function Game() {
             tempMatrix = alterRegionRemainings(tempMatrix, cell.regionY, cell.regionX, value, false)
         }
 
-        setProperty(tempMatrix, rowIndex, colIndex, 'value', value)
-        setSelectedCellRemainings(getRemainings(matrix[rowIndex][colIndex]))
+        return getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'value', value)
+
     }
 
     function cellSelected(rowIndex, colIndex) {
@@ -92,31 +106,33 @@ function Game() {
         setPossibilities(getPossibilitiesForSelected(remainings, matrix[rowIndex][colIndex]))
     }
 
-    function numberExistsInRow(rowIndex, number, originalColIndex) {
-        let colIndex = matrix[rowIndex].findIndex( cell => cell.value === number)
-        setProperty(matrix, rowIndex, colIndex, 'highlighted', true)
+    function numberExistsInRow(tempMatrix, rowIndex, number, originalColIndex) {
+        let colIndex = tempMatrix[rowIndex].findIndex( cell => cell.value === number)
+        setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', true))
         if (colIndex !== originalColIndex) {
-            setTimeout( () => { setProperty(matrix, rowIndex, colIndex, 'highlighted', false) }, animationDuration)
+            setTimeout( () => {
+                setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', false))
+            }, animationDuration)
         }
 
         return colIndex !== -1
     }
 
-    function numberExistsInColumn(colIndex, number, originalRowIndex) {
-        let rowIndex = matrix.reduce( (acc,row) => {
+    function numberExistsInColumn(tempMatrix, colIndex, number, originalRowIndex) {
+        let rowIndex = tempMatrix.reduce( (acc,row) => {
             acc.push(row[colIndex])
             return acc
         }, []).findIndex( cell => cell.value === number)
-        setProperty(matrix, rowIndex, colIndex, 'highlighted', true)
+        setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', true))
         if (rowIndex !== originalRowIndex) {
-            setTimeout( () => { setProperty(matrix, rowIndex, colIndex, 'highlighted', false) }, animationDuration)
+            setTimeout( () => { setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', false)) }, animationDuration)
         }
 
         return rowIndex !== -1
     }
 
-    function numberExistsInRegion(regionY, regionX, number, originalRowIndex, originalColIndex) {
-        let cell = matrix.filter( (row, currentRowIndex) => {
+    function numberExistsInRegion(tempMatrix, regionY, regionX, number, originalRowIndex, originalColIndex) {
+        let cell = tempMatrix.filter( (row, currentRowIndex) => {
             let currentRegionY = getRegionIndex(currentRowIndex)
             return currentRegionY === regionY
         }).reduce( (acc, row) => {
@@ -131,9 +147,9 @@ function Game() {
 
         let { rowIndex, colIndex } = cell
 
-        setProperty(matrix, rowIndex, colIndex, 'highlighted', true)
+        setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', true))
         if (rowIndex !== originalRowIndex) {
-            setTimeout( () => { setProperty(matrix, rowIndex, colIndex, 'highlighted', false) }, animationDuration)
+            setTimeout( () => { setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', false)) }, animationDuration)
         }
         return true
     }
@@ -205,8 +221,8 @@ function Game() {
         })
     }
 
-    function setProperty(tempMatrix, rowIndex, colIndex, property, value) {
-        setMatrix( tempMatrix.map( (row, currentRowIndex) => {
+    function getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, property, value) {
+        return tempMatrix.map( (row, currentRowIndex) => {
             if ( rowIndex === currentRowIndex) {
                 return row.map( (cell, currentColIndex) => {
                     if (colIndex === currentColIndex) {
@@ -216,7 +232,7 @@ function Game() {
                 })
             }
             return row
-        }))
+        })
     }
 
     function getRemainings(cell) {
@@ -335,7 +351,8 @@ function Game() {
             </div>
             <GameGenerator
                 matrix={matrix}
-                updateValue={updateValue}
+                setMatrix={setMatrix}
+                getUpdatedMatrix={getUpdatedMatrix}
                 getRemainings={getRemainings}
                 getPossibilitiesForSelected={getPossibilitiesForSelected}
             />
