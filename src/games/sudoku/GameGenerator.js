@@ -1,6 +1,6 @@
 import {  useState, useEffect } from 'react'
 
-function GameGenerator({matrix, setMatrix, getUpdatedMatrix, getRemainings, getPossibilitiesForSelected}) {
+function GameGenerator({matrix, setMatrix, getUpdatedMatrix, getRemainings, getPossibilitiesForSelected, getCleanMatrix}) {
 
     let [started, setStarted] = useState(false)
 
@@ -16,7 +16,7 @@ function GameGenerator({matrix, setMatrix, getUpdatedMatrix, getRemainings, getP
             return
         }
 
-        const cells = flattenMatrix(matrix)
+        const cells = flattenMatrix(tempMatrix)
         let smallerValue = cells.reduce( (acc, cell) => {
             let remainingsLength = getRemainings(cell).length
             if (remainingsLength < acc && cell.value === '') {
@@ -25,18 +25,18 @@ function GameGenerator({matrix, setMatrix, getUpdatedMatrix, getRemainings, getP
             return acc
         }, 9)
 
-        const candidateCells = cells.filter( cell => {
-            let remainingsLength = getRemainings(cell).length
-            return remainingsLength === smallerValue && cell.value === ''
-        })
+        if (smallerValue > 0) {
+            const candidateCells = cells.filter( cell => {
+                let remainingsLength = getRemainings(cell).length
+                return remainingsLength === smallerValue && cell.value === ''
+            })
 
-        if(candidateCells.length > 0) {
             const selectedCellIndex = Math.floor(Math.random() * (candidateCells.length-1))
 
             const selectedCell = candidateCells[selectedCellIndex]
             const selectedCellRemainings = getRemainings(selectedCell)
 
-            const possibilitiesForSelected = getPossibilitiesForSelected(selectedCellRemainings, selectedCell)
+            const possibilitiesForSelected = getPossibilitiesForSelected(tempMatrix, selectedCellRemainings, selectedCell)
 
             const highestSmallest = possibilitiesForSelected.reduce( (acc, pos) => {
                 if (pos.smaller > acc) {
@@ -49,7 +49,7 @@ function GameGenerator({matrix, setMatrix, getUpdatedMatrix, getRemainings, getP
                 return pos.smaller === highestSmallest
             }).map( ({number}) => number)
 
-            const newValueIndex = Math.floor(Math.random() * (candidatesWithHighestSmaller.length-1))
+            const newValueIndex = Math.floor(Math.random() * (candidatesWithHighestSmaller.length))
             let newValue = candidatesWithHighestSmaller[newValueIndex]
 
             tempMatrix = getUpdatedMatrix(tempMatrix, selectedCell.rowIndex, selectedCell.colIndex, newValue)
@@ -57,19 +57,20 @@ function GameGenerator({matrix, setMatrix, getUpdatedMatrix, getRemainings, getP
             generateNextStep(tempMatrix, count+1)
         }
         else {
-            setMatrix(tempMatrix)
             console.log('finished')
+            setStarted(started+1)
         }
 
     }
 
     useEffect( () => {
-        setStarted(true)
+        setStarted(1)
     }, [])
 
     useEffect( () => {
-        if (started) {
-            generateNextStep(matrix, 0);
+        if (started > 0 && started < 4) {
+            console.log(`starting ${started}`)
+            generateNextStep(getCleanMatrix(), 0)
         }
     }, [started])
 

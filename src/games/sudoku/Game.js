@@ -65,7 +65,7 @@ function Game() {
 
     function getUpdatedMatrix(tempMatrix, rowIndex, colIndex, value) {
 
-        let cell = matrix[rowIndex][colIndex]
+        let cell = tempMatrix[rowIndex][colIndex]
 
         const existsInRow    = numberExistsInRow(tempMatrix, rowIndex, value, colIndex)
         const existsInColumn = numberExistsInColumn(tempMatrix, colIndex, value, rowIndex)
@@ -100,10 +100,24 @@ function Game() {
 
     }
 
+    function getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, property, value) {
+        return tempMatrix.map( (row, currentRowIndex) => {
+            if ( rowIndex === currentRowIndex) {
+                return row.map( (cell, currentColIndex) => {
+                    if (colIndex === currentColIndex) {
+                        cell[property] = value
+                    }
+                    return cell
+                })
+            }
+            return row
+        })
+    }
+
     function cellSelected(rowIndex, colIndex) {
         let remainings = getRemainings(matrix[rowIndex][colIndex])
         setSelectedCellRemainings(remainings)
-        setPossibilities(getPossibilitiesForSelected(remainings, matrix[rowIndex][colIndex]))
+        setPossibilities(getPossibilitiesForSelected(matrix, remainings, matrix[rowIndex][colIndex]))
     }
 
     function numberExistsInRow(tempMatrix, rowIndex, number, originalColIndex) {
@@ -221,20 +235,6 @@ function Game() {
         })
     }
 
-    function getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, property, value) {
-        return tempMatrix.map( (row, currentRowIndex) => {
-            if ( rowIndex === currentRowIndex) {
-                return row.map( (cell, currentColIndex) => {
-                    if (colIndex === currentColIndex) {
-                        cell[property] = value
-                    }
-                    return cell
-                })
-            }
-            return row
-        })
-    }
-
     function getRemainings(cell) {
         return [1,2,3,4,5,6,7,8,9].filter( number => {
             return cell.remainingPerRow.includes(number)
@@ -243,13 +243,13 @@ function Game() {
         })
     }
 
-    function getPossibilitiesForSelected(remainings, cell) {
+    function getPossibilitiesForSelected(tempMatrix, remainings, cell) {
         return remainings.map( number => {
-            let row = JSON.parse(JSON.stringify(matrix[cell.rowIndex]))
-            let col = JSON.parse(JSON.stringify(matrix.map( currentRow => {
+            let row = JSON.parse(JSON.stringify(tempMatrix[cell.rowIndex]))
+            let col = JSON.parse(JSON.stringify(tempMatrix.map( currentRow => {
                 return currentRow[cell.colIndex]
             })))
-            let region = JSON.parse(JSON.stringify(matrix.reduce( (acc, currentRow) => {
+            let region = JSON.parse(JSON.stringify(tempMatrix.reduce( (acc, currentRow) => {
                 return acc.concat(currentRow.filter( currentCell => {
                     return currentCell.rowIndex !== cell.rowIndex
                         && currentCell.colIndex !== cell.colIndex
@@ -353,6 +353,7 @@ function Game() {
                 matrix={matrix}
                 setMatrix={setMatrix}
                 getUpdatedMatrix={getUpdatedMatrix}
+                getCleanMatrix={getCleanMatrix}
                 getRemainings={getRemainings}
                 getPossibilitiesForSelected={getPossibilitiesForSelected}
             />
