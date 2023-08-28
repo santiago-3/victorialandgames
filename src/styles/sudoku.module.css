@@ -107,3 +107,12 @@
     padding: 20px;
     color: white;
 }
+
+button {
+    margin-bottom: 5px;
+    background-color: #222;
+    padding: 8px;
+    color: #eee;
+    border: none;
+    border-radius: 8px;
+}

@@ -19,6 +19,11 @@ function Game() {
     let [ possibilities, setPossibilities ] = useState([])
     let [ selectedCellRemainings, setSelectedCellRemainings ] = useState([])
     let [ matrix, setMatrix ] = useState(getCleanMatrix())
+    let [ completeMatrix, setCompleteMatrix ] = useState({})
+
+    function showSolution() {
+        setMatrix(JSON.parse(completeMatrix))
+    }
 
     function getCleanMatrix() {
         return coordinates.map( (row, rowIndex) => {
@@ -122,6 +127,11 @@ function Game() {
 
     function numberExistsInRow(tempMatrix, rowIndex, number, originalColIndex) {
         let colIndex = tempMatrix[rowIndex].findIndex( cell => cell.value === number)
+
+        if (colIndex === -1) {
+            return false
+        }
+
         setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', true))
         if (colIndex !== originalColIndex) {
             setTimeout( () => {
@@ -129,7 +139,7 @@ function Game() {
             }, animationDuration)
         }
 
-        return colIndex !== -1
+        return true
     }
 
     function numberExistsInColumn(tempMatrix, colIndex, number, originalRowIndex) {
@@ -137,12 +147,19 @@ function Game() {
             acc.push(row[colIndex])
             return acc
         }, []).findIndex( cell => cell.value === number)
-        setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', true))
-        if (rowIndex !== originalRowIndex) {
-            setTimeout( () => { setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', false)) }, animationDuration)
+
+        if (rowIndex === -1) {
+            return false
         }
 
-        return rowIndex !== -1
+        setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', true))
+        if (rowIndex !== originalRowIndex) {
+            setTimeout( () => {
+                setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', false))
+            }, animationDuration)
+        }
+
+        return true
     }
 
     function numberExistsInRegion(tempMatrix, regionY, regionX, number, originalRowIndex, originalColIndex) {
@@ -163,7 +180,9 @@ function Game() {
 
         setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', true))
         if (rowIndex !== originalRowIndex) {
-            setTimeout( () => { setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', false)) }, animationDuration)
+            setTimeout( () => {
+                setMatrix(getMatrixWithUpdatedProperty(tempMatrix, rowIndex, colIndex, 'highlighted', false))
+                }, animationDuration)
         }
         return true
     }
@@ -344,6 +363,11 @@ function Game() {
     return (
         <>
             <div className={styles.sudoku}>
+                <div>
+                    <button onClick={showSolution}>
+                        solution
+                    </button>
+                </div>
                 <div className={styles.board}>
                     {board}
                 </div>
@@ -356,6 +380,8 @@ function Game() {
                 getCleanMatrix={getCleanMatrix}
                 getRemainings={getRemainings}
                 getPossibilitiesForSelected={getPossibilitiesForSelected}
+                getRegionIndex={getRegionIndex}
+                setCompleteMatrix={setCompleteMatrix}
             />
         </>
     )
