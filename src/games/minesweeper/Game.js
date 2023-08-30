@@ -50,7 +50,7 @@ function Minesweeper({width, height, totalMines}) {
         return mines
     }
 
-    let [ minePositions, _] = useState(selectMinePositions(totalMines))
+    let [ minePositions ] = useState(selectMinePositions(totalMines))
     let [ rows, setRows ]   = useState( [] )
     let [ state, setState ] = useState(states.RUNNING)
 
@@ -88,7 +88,7 @@ function Minesweeper({width, height, totalMines}) {
 
     function squareClicked(rowNum, squareNum) {
         console.log('clicked')
-        if (state == states.RUNNING) {
+        if (state === states.RUNNING) {
             console.log('running')
             let square = rows[rowNum][squareNum]
             if (square.hasFlag) {
@@ -106,7 +106,7 @@ function Minesweeper({width, height, totalMines}) {
 
     function rightClicked(rowNum, squareNum) {
         let square = rows[rowNum][squareNum]
-        if (state == states.RUNNING && !square.revealed) {
+        if (state === states.RUNNING && !square.revealed) {
             toggleFlag(rowNum, squareNum)
         }
     }

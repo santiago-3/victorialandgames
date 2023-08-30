@@ -78,7 +78,7 @@ function GameGenerator({
     }, [])
 
     useEffect( () => {
-        if (started > 0 && started < 4) {
+        if (started > 0 && started < 6) {
             console.log(`starting ${started}`)
             generateNextStep(getCleanMatrix(), 0)
         }
@@ -98,12 +98,40 @@ function GameGenerator({
             }
         })
 
-        remove(coordsByArea, tempMatrix, 1, 64)
+        remove(coordsByArea, tempMatrix, 2, 36, 19)
     }
 
-    function remove(coordsByArea, tempMatrix, minPerArea, itemsToRemove){
+    function remove(coordsByArea, tempMatrix, minPerArea, itemsToSweep, itemsToRemove){
 
-        const randomAreaIndex = Math.floor(Math.random() * (coordsByArea.length))
+        let randomAreaIndex
+
+        if (itemsToSweep > 0) {
+            const biggestAmountOfNumbersPerArea = coordsByArea.reduce((acc, area) => {
+                if (area.cells.length > acc) {
+                    return area.cells.length
+                }
+                return acc
+            }, 0)
+
+            const candidateAreasIndexes = coordsByArea
+                .map( (area, areaIndex) => {
+                    return {
+                        squares: area.cells.length,
+                        index: areaIndex
+                    }
+                })
+                .filter( ({squares}) => squares === biggestAmountOfNumbersPerArea )
+                .map( ({index}) => index)
+
+            const areaIndexesIndex = Math.floor(Math.random() * (candidateAreasIndexes.length))
+            randomAreaIndex = candidateAreasIndexes[areaIndexesIndex]
+            itemsToSweep--
+        }
+        else {
+            randomAreaIndex = Math.floor(Math.random() * (coordsByArea.length))
+            itemsToRemove--
+        }
+
         const randomArea = coordsByArea[randomAreaIndex]
         const areaLength = randomArea.cells.length
 
@@ -114,7 +142,6 @@ function GameGenerator({
         const colIndex = (randomArea.areaX * 3) + relX
 
         coordsByArea[randomAreaIndex].cells.splice(randomSquareIndex, 1)
-        itemsToRemove--
 
         if (coordsByArea[randomAreaIndex].cells.length === minPerArea) {
             coordsByArea.splice(randomAreaIndex, 1)
@@ -131,6 +158,7 @@ function GameGenerator({
                             colIndex    : colIndex,
                             value       : ' ',
                             highlighted : false,
+                            locked      : false,
                             remainingPerRow     : [1,2,3,4,5,6,7,8,9],
                             remainingPerCol     : [1,2,3,4,5,6,7,8,9],
                             remainingPerRegion  : [1,2,3,4,5,6,7,8,9],
@@ -144,7 +172,7 @@ function GameGenerator({
 
         setMatrix(tempMatrix)
         if (itemsToRemove > 0) {
-            remove(coordsByArea, tempMatrix, minPerArea, itemsToRemove)
+            remove(coordsByArea, tempMatrix, minPerArea, itemsToSweep, itemsToRemove)
         }
 
     }

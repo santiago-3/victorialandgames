@@ -5,6 +5,7 @@ function Cell({
     colIndex,
     value,
     highlighted,
+    locked,
     updateValue,
     cellSelected,
     remainingPerRow,
@@ -15,11 +16,14 @@ function Cell({
     if (highlighted) {
         classes.push(styles.highlighted)
     }
+    if (!locked) {
+        classes.push(styles['non-locked'])
+    }
     if ((colIndex + 1) % 3 === 0) {
         classes.push(styles['border-right'])
     }
     let displayValue = value
-    if (value === "") {
+    if (value === "" && false) {
         displayValue = [1,2,3,4,5,6,7,8,9].filter( number => {
             return remainingPerRow.includes(number)
                 && remainingPerCol.includes(number)
@@ -33,7 +37,7 @@ function Cell({
             <input
                 type="text"
                 onKeyUp={e => { updateValue(rowIndex, colIndex, e.keyCode, e.target) }}
-                onFocus={() => { cellSelected(rowIndex, colIndex) }}
+                onFocus={e => { cellSelected(rowIndex, colIndex, e.target) }}
                 value={displayValue}
             />
         </div>

@@ -35,6 +35,7 @@ function Game() {
                     colIndex    : colIndex,
                     value       : '',
                     highlighted : false,
+                    locked      : true,
                     remainingPerRow     : [1,2,3,4,5,6,7,8,9],
                     remainingPerCol     : [1,2,3,4,5,6,7,8,9],
                     remainingPerRegion  : [1,2,3,4,5,6,7,8,9],
@@ -58,17 +59,13 @@ function Game() {
             return
         }
 
-        if (focusTarget) {
-            focusTarget.blur()
-        }
-
-        let tempMatrix = getUpdatedMatrix(matrix, rowIndex, colIndex, value)
+        let tempMatrix = getUpdatedMatrix(matrix, rowIndex, colIndex, value, focusTarget)
 
         setMatrix(tempMatrix)
         setSelectedCellRemainings(getRemainings(matrix[rowIndex][colIndex]))
     }
 
-    function getUpdatedMatrix(tempMatrix, rowIndex, colIndex, value) {
+    function getUpdatedMatrix(tempMatrix, rowIndex, colIndex, value, focusTarget) {
 
         let cell = tempMatrix[rowIndex][colIndex]
 
@@ -78,6 +75,10 @@ function Game() {
 
         if (existsInRow || existsInColumn || existsInRegion) {
             return tempMatrix
+        }
+
+        if (focusTarget) {
+            focusTarget.blur()
         }
 
         if (Number.isInteger(cell.value) && value === "") {
@@ -119,10 +120,15 @@ function Game() {
         })
     }
 
-    function cellSelected(rowIndex, colIndex) {
-        let remainings = getRemainings(matrix[rowIndex][colIndex])
-        setSelectedCellRemainings(remainings)
-        setPossibilities(getPossibilitiesForSelected(matrix, remainings, matrix[rowIndex][colIndex]))
+    function cellSelected(rowIndex, colIndex, focusTarget) {
+        if (!matrix[rowIndex][colIndex].locked) {
+            let remainings = getRemainings(matrix[rowIndex][colIndex])
+            setSelectedCellRemainings(remainings)
+            setPossibilities(getPossibilitiesForSelected(matrix, remainings, matrix[rowIndex][colIndex]))
+        }
+        else {
+            focusTarget.blur()
+        }
     }
 
     function numberExistsInRow(tempMatrix, rowIndex, number, originalColIndex) {
@@ -341,6 +347,7 @@ function Game() {
                 rowIndex={rowIndex}
                 value={cell.value}
                 highlighted={cell.highlighted}
+                locked={cell.locked}
                 updateValue={updateValue}
                 remainingPerRow={cell.remainingPerRow}
                 remainingPerCol={cell.remainingPerCol}
