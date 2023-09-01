@@ -5,44 +5,16 @@ import GameGenerator from './GameGenerator.js'
 
 const animationDuration = 500
 
-function Game() {
-
-    const coordinates = Array.from( { length: 9 }, (_,i) => i ).map( rowIndex => {
-        let cells = Array.from( { length: 9 }, (_,i) => i).map( colIndex => {
-            return [rowIndex, colIndex]
-        })
-        return cells
-    })
-
-    const getRegionIndex = index => Math.ceil((index+1) / 3)
+function Game({matrix,
+    setMatrix,
+    getCleanMatrix,
+    getRegionIndex,
+    setCompleteMatrix,
+    setCleanMatrix,
+}) {
 
     let [ possibilities, setPossibilities ] = useState([])
     let [ selectedCellRemainings, setSelectedCellRemainings ] = useState([])
-    let [ matrix, setMatrix ] = useState(getCleanMatrix())
-    let [ completeMatrix, setCompleteMatrix ] = useState({})
-
-    function showSolution() {
-        setMatrix(JSON.parse(completeMatrix))
-    }
-
-    function getCleanMatrix() {
-        return coordinates.map( (row, rowIndex) => {
-            return row.map( (_, colIndex) => {
-                return {
-                    regionY     : getRegionIndex(rowIndex),
-                    regionX     : getRegionIndex(colIndex),
-                    rowIndex    : rowIndex,
-                    colIndex    : colIndex,
-                    value       : '',
-                    highlighted : false,
-                    locked      : true,
-                    remainingPerRow     : [1,2,3,4,5,6,7,8,9],
-                    remainingPerCol     : [1,2,3,4,5,6,7,8,9],
-                    remainingPerRegion  : [1,2,3,4,5,6,7,8,9],
-                }
-            })
-        })
-    }
 
     function updateValue(rowIndex, colIndex, keyCode, focusTarget) {
         let value = null
@@ -369,16 +341,8 @@ function Game() {
 
     return (
         <>
-            <div className={styles.sudoku}>
-                <div>
-                    <button onClick={showSolution}>
-                        solution
-                    </button>
-                </div>
-                <div className={styles.board}>
-                    {board}
-                </div>
-                <div className={styles.info} >{ possibilitiesDisplay }</div>
+            <div className={styles.board}>
+                {board}
             </div>
             <GameGenerator
                 matrix={matrix}
@@ -389,6 +353,7 @@ function Game() {
                 getPossibilitiesForSelected={getPossibilitiesForSelected}
                 getRegionIndex={getRegionIndex}
                 setCompleteMatrix={setCompleteMatrix}
+                setCleanMatrix={setCleanMatrix}
             />
         </>
     )

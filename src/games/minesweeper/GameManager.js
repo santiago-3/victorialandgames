@@ -11,7 +11,7 @@ function GameManager() {
 
     return (
         <div class={styles.minesweeper}>
-            <div class={styles['title-bar']}>
+            <div class='title-bar'>
                 Mine sweeper
             </div>
             <div class={styles['status-bar']}>

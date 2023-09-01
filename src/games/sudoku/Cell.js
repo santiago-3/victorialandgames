@@ -19,6 +19,9 @@ function Cell({
     if (!locked) {
         classes.push(styles['non-locked'])
     }
+    else {
+        classes.push(styles['locked'])
+    }
     if ((colIndex + 1) % 3 === 0) {
         classes.push(styles['border-right'])
     }

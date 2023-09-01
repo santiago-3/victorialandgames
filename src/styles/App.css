@@ -6,6 +6,13 @@ body {
     text-align: center;
     height: 100%;
 }
+.title-bar {
+    background-color: #000;
+    border-radius: 8px;
+    color: #ccc;
+    padding: 5px;
+    margin: 5px;
+}
 .content {
     display: flex;
     justify-content: center;

@@ -8,7 +8,8 @@ function GameGenerator({
     getPossibilitiesForSelected,
     getCleanMatrix,
     getRegionIndex,
-    setCompleteMatrix
+    setCompleteMatrix,
+    setCleanMatrix,
 }) {
 
     let [started, setStarted] = useState(false)
@@ -173,6 +174,9 @@ function GameGenerator({
         setMatrix(tempMatrix)
         if (itemsToRemove > 0) {
             remove(coordsByArea, tempMatrix, minPerArea, itemsToSweep, itemsToRemove)
+        }
+        else {
+            setCleanMatrix(JSON.stringify(tempMatrix))
         }
 
     }

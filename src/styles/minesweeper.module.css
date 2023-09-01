@@ -4,13 +4,6 @@ button { cursor: pointer }
     border-radius: 8px;
     padding: 10px;
 }
-.title-bar {
-    background-color: #000;
-    border-radius: 8px;
-    color: #ccc;
-    padding: 5px;
-    margin: 5px;
-}
 
 .status-bar {
     display: flex;
