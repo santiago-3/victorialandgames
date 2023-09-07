@@ -12,7 +12,10 @@ function GameGenerator({
     setCleanMatrix,
 }) {
 
+    const concentrationRate = 4
+
     let [started, setStarted] = useState(false)
+
 
     function flattenMatrix(tempMatrix) {
         return tempMatrix.reduce( (acc, row) => {
@@ -68,7 +71,6 @@ function GameGenerator({
             generateNextStep(tempMatrix, count+1)
         }
         else {
-            console.log('finished')
             setStarted(started+1)
         }
 
@@ -80,90 +82,68 @@ function GameGenerator({
 
     useEffect( () => {
         if (started > 0 && started < 6) {
-            console.log(`starting ${started}`)
             generateNextStep(getCleanMatrix(), 0)
         }
     }, [started])
 
     function startRemoving(tempMatrix) {
-        const coordsByArea = Array.from( { length: 9 }, (_,i) => i ).map( areaIndex => {
-            let cells = Array.from( { length: 9 }, (_,i) => i).map( squareIndex => {
-                const yIndex = Math.floor(squareIndex / 3)
-                const xIndex = squareIndex % 3
-                return [yIndex, xIndex]
-            })
-            return {
-                areaY : Math.floor(areaIndex / 3),
-                areaX : areaIndex % 3,
-                cells
-            }
-        })
 
-        remove(coordsByArea, tempMatrix, 2, 36, 19)
+        const positions = Array.from( { length: 81 }, (_,pos) => ({
+            pos,
+            adder: 24,
+            rowIndex: Math.floor(pos / 9),
+            colIndex: Math.floor(pos % 9),
+            regionIndex: (Math.floor(pos / 27) * 3) + Math.floor((Math.floor(pos % 9 ) / 3)),
+        }))
+        removeBySection(positions, tempMatrix, 56)
+
     }
 
-    function remove(coordsByArea, tempMatrix, minPerArea, itemsToSweep, itemsToRemove){
+    function removeBySection(positions, tempMatrix, remaining) {
 
-        let randomAreaIndex
+        const biggestAdder = positions.reduce ( (bigger, {adder}) => {
+            if (adder > bigger) {
+                return adder
+            }
+            return bigger
+        }, 0)
 
-        if (itemsToSweep > 0) {
-            const biggestAmountOfNumbersPerArea = coordsByArea.reduce((acc, area) => {
-                if (area.cells.length > acc) {
-                    return area.cells.length
+        const candidatePositions = positions
+            .filter( ({adder}) => adder >= biggestAdder-concentrationRate )
+            .map( ({pos}) => pos )
+
+        const randomPositionIndex   = Math.floor(Math.random() * (candidatePositions.length))
+        const randomPosition        = candidatePositions[randomPositionIndex]
+
+        const selectedRowIndex      = positions.find(({pos}) => pos === randomPosition).rowIndex
+        const selectedColIndex      = positions.find(({pos}) => pos === randomPosition).colIndex
+        const selectedRegionIndex   = positions.find(({pos}) => pos === randomPosition).regionIndex
+
+        positions = positions
+            .filter( ({pos}) => pos !== randomPosition )
+            .map( ({pos, adder, rowIndex, colIndex, regionIndex}) => {
+
+                if (selectedRowIndex === rowIndex) {
+                    adder--
                 }
-                return acc
-            }, 0)
 
-            const candidateAreasIndexes = coordsByArea
-                .map( (area, areaIndex) => {
-                    return {
-                        squares: area.cells.length,
-                        index: areaIndex
-                    }
-                })
-                .filter( ({squares}) => squares === biggestAmountOfNumbersPerArea )
-                .map( ({index}) => index)
+                if (selectedColIndex === colIndex) {
+                    adder--
+                }
 
-            const areaIndexesIndex = Math.floor(Math.random() * (candidateAreasIndexes.length))
-            randomAreaIndex = candidateAreasIndexes[areaIndexesIndex]
-            itemsToSweep--
-        }
-        else {
-            randomAreaIndex = Math.floor(Math.random() * (coordsByArea.length))
-            itemsToRemove--
-        }
-
-        const randomArea = coordsByArea[randomAreaIndex]
-        const areaLength = randomArea.cells.length
-
-        const randomSquareIndex = Math.floor(Math.random() * areaLength)
-
-        const [relX, relY] = randomArea.cells[randomSquareIndex]
-        const rowIndex = (randomArea.areaY * 3) + relY
-        const colIndex = (randomArea.areaX * 3) + relX
-
-        coordsByArea[randomAreaIndex].cells.splice(randomSquareIndex, 1)
-
-        if (coordsByArea[randomAreaIndex].cells.length === minPerArea) {
-            coordsByArea.splice(randomAreaIndex, 1)
-        }
+                if (selectedRegionIndex === regionIndex) {
+                    adder--
+                }
+                return {pos, adder, rowIndex, colIndex, regionIndex}
+            })
 
         tempMatrix = tempMatrix.map( (row, currentRowIndex) => {
-            if ( rowIndex === currentRowIndex) {
+            if ( selectedRowIndex === currentRowIndex) {
                 return row.map( (cell, currentColIndex) => {
-                    if (colIndex === currentColIndex) {
-                        return {
-                            regionY     : getRegionIndex(rowIndex),
-                            regionX     : getRegionIndex(colIndex),
-                            rowIndex    : rowIndex,
-                            colIndex    : colIndex,
-                            value       : ' ',
-                            highlighted : false,
-                            locked      : false,
-                            remainingPerRow     : [1,2,3,4,5,6,7,8,9],
-                            remainingPerCol     : [1,2,3,4,5,6,7,8,9],
-                            remainingPerRegion  : [1,2,3,4,5,6,7,8,9],
-                        }
+                    if (selectedColIndex === currentColIndex) {
+                        cell.value = ' '
+                        cell.locked = false
+                        return cell
                     }
                     return cell
                 })
@@ -171,14 +151,15 @@ function GameGenerator({
             return row
         })
 
-        setMatrix(tempMatrix)
-        if (itemsToRemove > 0) {
-            remove(coordsByArea, tempMatrix, minPerArea, itemsToSweep, itemsToRemove)
+        remaining--
+        if (remaining > 0){
+            removeBySection(positions, tempMatrix, remaining)
         }
         else {
             setCleanMatrix(JSON.stringify(tempMatrix))
         }
 
+        setMatrix(tempMatrix)
     }
 }
 

@@ -1,8 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Game from './Game.js'
 import styles from '../../styles/minesweeper.module.css'
 
-function GameManager() {
+function GameManager({items, selected, setSelected}) {
+
+    if (selected !== items.MINESWEEPER) {
+        setSelected(items.MINESWEEPER)
+    }
 
     let [width, setWidth]           = useState(8)
     let [height, setHeight]         = useState(10)

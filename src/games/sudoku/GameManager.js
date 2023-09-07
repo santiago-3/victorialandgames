@@ -2,8 +2,11 @@ import Game from './Game.js'
 import { useState } from 'react'
 import styles from '../../styles/sudoku.module.css'
 
-function GameManager() {
+function GameManager({items, selected, setSelected}) {
 
+    if (selected !== items.SUDOKU) {
+        setSelected(items.SUDOKU)
+    }
 
     const coordinates = Array.from( { length: 9 }, (_,i) => i ).map( rowIndex => {
         let cells = Array.from( { length: 9 }, (_,i) => i).map( colIndex => {
