@@ -14,12 +14,12 @@ function GameManager({items, selected, setSelected}) {
     let [gameKey, setGameKey]       = useState(1)
 
     return (
-        <div class={styles.minesweeper}>
-            <div class='title-bar'>
+        <div className={styles.minesweeper}>
+            <div className='title-bar'>
                 Mine sweeper
             </div>
-            <div class={styles['status-bar']}>
-                <div class={styles.param}>
+            <div className={styles['status-bar']}>
+                <div className={styles.param}>
                     <label>Width</label>
                     <input
                         type="text"
@@ -28,7 +28,7 @@ function GameManager({items, selected, setSelected}) {
                         onChange={ (e) => { setWidth(e.target.value) }}
                     />
                 </div>
-                <div class={styles.param}>
+                <div className={styles.param}>
                     <label>Height</label>
                     <input
                         type="text"
@@ -37,7 +37,7 @@ function GameManager({items, selected, setSelected}) {
                         onChange={ (e) => { setHeight(e.target.value) }}
                     />
                 </div>
-                <div class={styles.param}>
+                <div className={styles.param}>
                     <label>Mines</label>
                     <input
                         type="text"

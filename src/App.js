@@ -22,7 +22,7 @@ function App() {
         <header className="App-header">
             <MainMenu {...commonProps} />
         </header>
-        <div class="content">
+        <div className="content">
             <BrowserRouter>
                 <Routes>
                     <Route path="/minesweeper" element={ <Minesweeper {...commonProps} /> } />

@@ -36,7 +36,7 @@ function Square({
             img = <img src="/mine.png" />
         }
         else if (surroundingMines > 0){
-            number = <div class={styles.display}>{surroundingMines}</div>
+            number = <div className={styles.display}>{surroundingMines}</div>
             classes.push(styles[`mines-${surroundingMines}`])
         }
     }

@@ -1,12 +1,17 @@
-button { cursor: pointer }
-.minesweeper {
-    border: 3px dashed #006d00;
+button {
+    cursor: pointer;
+    border: none;
+    background-color: #fdd;
+    padding: 8px;
     border-radius: 8px;
-    padding: 10px;
+}
+.minesweeper {
+    border-radius: 8px;
 }
 
 .status-bar {
     display: flex;
+    margin-top: 10px;
     margin-bottom: 10px;
     justify-content: center;
 }
@@ -21,7 +26,7 @@ button { cursor: pointer }
 }
 
 .param label {
-    color: #ddd;
+    color: #444;
 }
 
 .param input {
@@ -33,56 +38,59 @@ button { cursor: pointer }
     background-color: #ccc;
 }
 
+/*
+ *  game
+ */
+
 .game {
-    padding: 5px 5px 5px 0px;
-    border-radius: 5px;
+    border: 3px dashed #faa;
+    border-radius: 8px;
 }
 .row {
     display: flex;
-    margin-bottom: 8px;
 }
 .square {
-    width: 32px;
-    height: 32px;
-    margin-left: 8px;
-    border-radius: 10px;
-    background-color: #333;
-    box-shadow: inset -2px -2px 5px #ddd;
-    cursor: pointer;
-    font-weight: bold;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    width: 45px;
+    height: 45px;
+    border: 1px solid #fee;
+    border-bottom: none;
+    border-right: none;
+    background-color: #fdd;
+}
+.square:first-child {
+    border-left: none;
+}
+
+.row:first-child .square{
+    border-top: none;
+}
+.row:last-child .square{
 }
 
 .game.running .square:hover {
-    background-color: #444;
-    box-shadow: inset -2px -2px 5px #eee;
+    background-color: none;
+    background: radial-gradient(#fff, #fdd);
+    cursor: pointer;
 }
 
 .game.gameOver .square:hover {
-    cursor: default;
+    background-color: #fdd;
 }
 
 .game.running .square.revealed:hover {
-    background-color: #aaa;
-    box-shadow: inset 3px 3px 5px #333;
+    cursor: default;
+    background: none;
 }
 
 .square .display {
-    padding-left: 3px;
+    line-height: 45px;
 }
 
 .square.revealed {
-    background-color: #aaa;
-    box-shadow: inset 3px 3px 5px #333;
-    cursor: default;
+    background: none;
 }
 
 .square.revealed:hover {
-    background-color: #aaa;
-    box-shadow: inset 3px 3px 5px #333;
 }
 
 .square.hasMine {
@@ -90,17 +98,16 @@ button { cursor: pointer }
 }
 
 .square img {
-    width: 24px;
-    height: 24px;
+    padding: 2px;
+    width: 40px;
+    height: 40px;
 }
 
 .hasMine img {
-    padding-top: 2px;
-    padding-left: 2px;
+    width: 40px;
 }
 
 .square.lost, .square.lost:hover{
-    background-color: #a55;
 }
 
 .mines-1 { color: #00b }

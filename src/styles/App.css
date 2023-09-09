@@ -7,10 +7,10 @@ body {
 }
 .title-bar {
     background-color: #800;
-    border-radius: 8px;
     color: #fff;
     padding: 5px;
-    margin: 5px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 .content {
     display: flex;
@@ -19,7 +19,6 @@ body {
 }
 nav {
     background-color: #fcc;
-    margin-bottom: 20px;
 }
 nav ul {
     margin: 0px;
