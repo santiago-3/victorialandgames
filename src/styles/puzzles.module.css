@@ -1,0 +1,50 @@
+.puzzles {
+    display: flex;
+    padding: 20px;
+}
+.puzzlesList {
+    padding: 0px 10px;
+    border-right: 3px dashed #faa;
+}
+.puzzlesList img {
+    width: 160px; 
+}
+
+.puzzleImage {
+    cursor: pointer;
+}
+
+.puzzle {
+    margin-left: 10px;
+}
+
+.row {
+    display: flex;
+}
+
+.piece {
+    width: 120px;
+    height: 90px;
+    border-right: 1px dashed rgba(200,200,200,1);
+    border-bottom: 1px dashed rgba(200,200,200,1);
+    background-size: 960px;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.receiver .screen {
+    width: 100%;
+    height: 100%;
+    background-color: #eef;
+    opacity: 0;
+}
+
+.receiver.drag-over .screen{
+    opacity: 0.8;
+}
+
+.puzzle.andybay .piece { background-image: url('../../public/images/puzzles/andy_bay_canyon.jpg') }
+.puzzle.city .piece { background-image: url('../../public/images/puzzles/city_crop.jpg') }
+.puzzle.ellenchan .piece { background-image: url('../../public/images/puzzles/ellenchan_crop.jpg') }
+.puzzle.gruendercoach .piece { background-image: url('../../public/images/puzzles/gruendercoach_crop.jpg') }
+.puzzle.kinkate .piece { background-image: url('../../public/images/puzzles/kinkate_mountain_landscape.jpg') }
