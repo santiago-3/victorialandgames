@@ -7,13 +7,12 @@ const Piece = ({thekey, bgImage, imageCoordY, imageCoordX, pieceCoordY, pieceCoo
     let draggableClasses = initialClasses
     let receiverClasses = [styles.receiver]
 
-    const [isDragOver, setIsDragOver] = useState(false)
-
     const width = 120
     const height = 90
 
-    const offsetX = width  * imageCoordX
-    const offsetY = height * imageCoordY
+    const [isDragOver, setIsDragOver] = useState(false)
+    const [offsetX, setOffsetX] = useState(width  * imageCoordX)
+    const [offsetY, setOffsetY] = useState(height * imageCoordY)
 
     const pieceStyles = {
         backgroundPosition: `-${offsetX}px -${offsetY}px`
@@ -26,21 +25,21 @@ const Piece = ({thekey, bgImage, imageCoordY, imageCoordX, pieceCoordY, pieceCoo
 
     const dragLeave = (ev) => {
         setIsDragOver(false)
+        setOffsetX(width * imageCoordX)
+        setOffsetY(height * imageCoordY)
     }
 
     const dragOver = (ev) => {
         ev.preventDefault()
         setIsDragOver(true)
-        console.log('over data', ev.dataTransfer.getData('text/plain'))
+        let [pcy, pcx, icy, icx] = ev.dataTransfer.getData('text/plain').split('-')
+
+        setOffsetX(width * icx)
+        setOffsetY(height * icy)
     }
 
     const drop = (ev) => {
-        console.log('drop data', ev.dataTransfer.getData('text/plain'))
         setIsDragOver(false)
-    }
-
-    if (isDragOver) {
-        receiverClasses.push(styles['drag-over'])
     }
 
     const coords = [pieceCoordY, pieceCoordX, imageCoordY, imageCoordX]
