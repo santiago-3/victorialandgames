@@ -1,7 +1,18 @@
 import { useState } from 'react'
 import styles from '../../styles/puzzles.module.css'
 
-const Piece = ({thekey, bgImage, imageCoordY, imageCoordX, pieceCoordY, pieceCoordX}) => {
+const Piece = ({
+        thekey,
+        swap,
+        revertSwap,
+        bgImage,
+        imageCoordY,
+        imageCoordX,
+        pieceCoordY,
+        pieceCoordX,
+        isDragOver,
+        setIsDragOver
+    }) => {
 
     const initialClasses = [styles.piece, styles[bgImage]]
     let draggableClasses = initialClasses
@@ -10,9 +21,8 @@ const Piece = ({thekey, bgImage, imageCoordY, imageCoordX, pieceCoordY, pieceCoo
     const width = 120
     const height = 90
 
-    const [isDragOver, setIsDragOver] = useState(false)
-    const [offsetX, setOffsetX] = useState(width  * imageCoordX)
-    const [offsetY, setOffsetY] = useState(height * imageCoordY)
+    const offsetX = width  * imageCoordX
+    const offsetY = height * imageCoordY
 
     const pieceStyles = {
         backgroundPosition: `-${offsetX}px -${offsetY}px`
@@ -24,22 +34,35 @@ const Piece = ({thekey, bgImage, imageCoordY, imageCoordX, pieceCoordY, pieceCoo
     }
 
     const dragLeave = (ev) => {
-        setIsDragOver(false)
-        setOffsetX(width * imageCoordX)
-        setOffsetY(height * imageCoordY)
+        if (isDragOver) {
+            revertSwap()
+        }
+
     }
 
     const dragOver = (ev) => {
         ev.preventDefault()
-        setIsDragOver(true)
-        let [pcy, pcx, icy, icx] = ev.dataTransfer.getData('text/plain').split('-')
+        let [pcy, pcx, icy, icx] = ev.dataTransfer.getData('text/plain').split('-').map( n => Number(n) )
 
-        setOffsetX(width * icx)
-        setOffsetY(height * icy)
+        if (! isDragOver) {
+            const target = {
+                pieceCoordY,
+                pieceCoordX,
+                imageCoordY,
+                imageCoordX,
+            }
+            const origin = {
+                pieceCoordY : pcy,
+                pieceCoordX : pcx,
+                imageCoordY : icy,
+                imageCoordX : icx,
+            }
+            swap (target, origin)
+        }
     }
 
     const drop = (ev) => {
-        setIsDragOver(false)
+        setIsDragOver(pieceCoordY, pieceCoordX, false)
     }
 
     const coords = [pieceCoordY, pieceCoordX, imageCoordY, imageCoordX]
