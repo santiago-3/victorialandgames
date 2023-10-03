@@ -22,6 +22,10 @@ const puzzles = [
         name: 'kinkate',
         fileName: 'kinkate_mountain_landscape.jpg',
     },
+    {
+        name: 'princess',
+        fileName: 'princess_crop.jpg',
+    },
 ]
 
 const GameManager = ({items, selected, setSelected}) => {

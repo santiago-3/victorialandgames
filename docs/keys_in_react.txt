@@ -1,0 +1,4 @@
+Keys are very important in lists of elements
+
+- all keys must be different in a list!
+- if you want an element to re-render, you must update the key!

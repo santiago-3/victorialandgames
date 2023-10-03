@@ -2,19 +2,17 @@ import { useState } from 'react'
 import Piece from './Piece.js'
 import styles from '../../styles/puzzles.module.css'
 
-const width = 3
-const height = 3
+const width = 8
+const height = 6
 
 const Game = ({ puzzles }) => {
 
     const [ grid, setGrid ] = useState(getInitialGrid())
+    const [ gridCount, setGridCount] = useState(0)
     const [ selectedPuzzle, setSelectedPuzzle ] = useState(puzzles[3])
-    const [ lastSwap, setLastSwap ] = useState({})
-
-    console.log(JSON.stringify(grid))
+    const [ currentSwap, setCurrentSwap ] = useState(null)
 
     function getInitialGrid() {
-
 
         const positions = new Set(Array.from( { length: width * height }, (_,i) => i ))
 
@@ -42,43 +40,70 @@ const Game = ({ puzzles }) => {
         })
     }
 
+    const getGridWithSwap = (currentGrid, target, origin) => {
+        return currentGrid.map( (row, rowIndex) => {
+            return row.map( (piece, pieceIndex) => {
+                if (rowIndex === target.pieceCoordY && pieceIndex === target.pieceCoordX) {
+                    return {
+                        ...piece,
+                        imageCoordY : origin.imageCoordY,
+                        imageCoordX : origin.imageCoordX,
+                        isDragOver  : true,
+                    }
+                }
+                if (rowIndex === origin.pieceCoordY && pieceIndex === origin.pieceCoordX) {
+                    return {
+                        ...piece,
+                        imageCoordY : target.imageCoordY,
+                        imageCoordX : target.imageCoordX,
+                    }
+                }
+                return { ...piece }
+            })
+        })
+    }
+
+    const getGridWithRevertedSwap = (currentGrid, target, origin) => {
+        return currentGrid.map( (row, rowIndex) => {
+            return row.map( (piece, pieceIndex) => {
+                if (rowIndex === target.pieceCoordY && pieceIndex === target.pieceCoordX) {
+                    return {
+                        ...piece,
+                        imageCoordY : target.imageCoordY,
+                        imageCoordX : target.imageCoordX,
+                        isDragOver  : false,
+                    }
+                }
+                if (rowIndex === origin.pieceCoordY && pieceIndex === origin.pieceCoordX) {
+                    return {
+                        ...piece,
+                        imageCoordY : origin.imageCoordY,
+                        imageCoordX : origin.imageCoordX,
+                    }
+                }
+                return { ...piece }
+            })
+        })
+    }
+
     const bgImage = selectedPuzzle.name
 
     const swap = (target, origin) => {
-        setLastSwap({ target, origin })
-        setGrid( grid.map( (row, rowIndex) => {
-            return row.map( (piece, pieceIndex) => {
-                if (rowIndex === target.pieceCoordY && pieceIndex === target.pieceCoordX) {
-                    piece.imageCoordY = origin.imageCoordY
-                    piece.imageCoordX = origin.imageCoordX
-                    piece.isDragOver  = true
-                }
-                if (rowIndex === origin.pieceCoordY && pieceIndex === origin.pieceCoordX) {
-                    piece.imageCoordY = target.imageCoordY
-                    piece.imageCoordX = target.imageCoordX
-                }
-                return piece
-            })
-        }))
+        let newGrid = grid
+        if (currentSwap !== null) {
+            newGrid = getGridWithRevertedSwap(grid, currentSwap.target, currentSwap.origin)
+        }
+        setGrid(getGridWithSwap(newGrid, target, origin))
+        setGridCount(gridCount+1)
+        setCurrentSwap({ target, origin })
     }
 
-    // if you think swap and revert swap are the same take a more careful look
     const revertSwap = () => {
-        const { target, origin } = lastSwap
-        setGrid( grid.map( (row, rowIndex) => {
-            return row.map( (piece, pieceIndex) => {
-                if (rowIndex === target.pieceCoordY && pieceIndex === target.pieceCoordX) {
-                    piece.imageCoordY = target.imageCoordY
-                    piece.imageCoordX = target.imageCoordX
-                    piece.isDragOver  = false
-                }
-                if (rowIndex === origin.pieceCoordY && pieceIndex === origin.pieceCoordX) {
-                    piece.imageCoordY = origin.imageCoordY
-                    piece.imageCoordX = origin.imageCoordX
-                }
-                return piece
-            })
-        }))
+        if (currentSwap !== null) {
+            setGrid(getGridWithRevertedSwap(grid, currentSwap.target, currentSwap.origin))
+            setGridCount(gridCount+1)
+            setCurrentSwap(null)
+        }
     }
 
     const setIsDragOver = (pieceCoordY, pieceCoordX, value) => {
@@ -95,10 +120,9 @@ const Game = ({ puzzles }) => {
     const puzzle = grid.map( (row, rowIndex) => {
         const rowPieces = row.map( piece => {
             const key = bgImage + String(piece.imageCoordY*width + piece.imageCoordX)
-            return <Piece 
+            return <Piece
                 key={key}
                 swap={swap}
-                revertSwap={revertSwap}
                 thekey={key}
                 bgImage={bgImage}
                 imageCoordY={piece.imageCoordY}
@@ -107,10 +131,12 @@ const Game = ({ puzzles }) => {
                 pieceCoordX={piece.pieceCoordX}
                 isDragOver={piece.isDragOver}
                 setIsDragOver={setIsDragOver}
+                setCurrentSwap={setCurrentSwap}
             />
         })
+        const rowKey = String(rowIndex) + String(gridCount)
         return (
-            <div key={rowIndex} className={styles.row}>
+            <div key={rowKey} className={styles.row}>
                 {rowPieces}
             </div>
         )
@@ -118,7 +144,7 @@ const Game = ({ puzzles }) => {
 
     const images = puzzles.map( puzzle => {
         return (
-            <div 
+            <div
                 onClick={ () => setSelectedPuzzle(puzzle) }
                 className={styles.puzzleImage} >
                 <img src={`images/puzzles/${puzzle.fileName}`} />

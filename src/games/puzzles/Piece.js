@@ -1,22 +1,26 @@
 import { useState } from 'react'
 import styles from '../../styles/puzzles.module.css'
 
+const dragIntensityNeeded = 15
+
 const Piece = ({
         thekey,
         swap,
-        revertSwap,
         bgImage,
         imageCoordY,
         imageCoordX,
         pieceCoordY,
         pieceCoordX,
         isDragOver,
-        setIsDragOver
+        setIsDragOver,
+        setCurrentSwap,
     }) => {
 
     const initialClasses = [styles.piece, styles[bgImage]]
     let draggableClasses = initialClasses
     let receiverClasses = [styles.receiver]
+    const [dragOverCount, setDragOverCount] = useState(0)
+
 
     const width = 120
     const height = 90
@@ -33,36 +37,40 @@ const Piece = ({
         ev.dataTransfer.setData('text/plain', ev.target.dataset.coords)
     }
 
-    const dragLeave = (ev) => {
-        if (isDragOver) {
-            revertSwap()
-        }
-
+    const dragLeaveOrEnd = (ev) => {
+        setDragOverCount(0)
     }
 
     const dragOver = (ev) => {
         ev.preventDefault()
-        let [pcy, pcx, icy, icx] = ev.dataTransfer.getData('text/plain').split('-').map( n => Number(n) )
+        if (dragOverCount === dragIntensityNeeded)  {
+            let [pcy, pcx, icy, icx] = ev.dataTransfer.getData('text/plain').split('-').map( n => Number(n) )
 
-        if (! isDragOver) {
-            const target = {
-                pieceCoordY,
-                pieceCoordX,
-                imageCoordY,
-                imageCoordX,
+            if (! isDragOver) {
+                const target = {
+                    pieceCoordY,
+                    pieceCoordX,
+                    imageCoordY,
+                    imageCoordX,
+                }
+                const origin = {
+                    pieceCoordY : pcy,
+                    pieceCoordX : pcx,
+                    imageCoordY : icy,
+                    imageCoordX : icx,
+                }
+                swap (target, origin)
             }
-            const origin = {
-                pieceCoordY : pcy,
-                pieceCoordX : pcx,
-                imageCoordY : icy,
-                imageCoordX : icx,
-            }
-            swap (target, origin)
+        }
+        else {
+            setDragOverCount( dragOverCount+1 )
         }
     }
 
     const drop = (ev) => {
+        setDragOverCount(0)
         setIsDragOver(pieceCoordY, pieceCoordX, false)
+        setCurrentSwap(null)
     }
 
     const coords = [pieceCoordY, pieceCoordX, imageCoordY, imageCoordX]
@@ -73,17 +81,16 @@ const Piece = ({
         <div
             onDrop={drop}
             onDragOver={dragOver}
-            className={receiverClasses.join(' ')}
+            style={pieceStyles}
+            className={draggableClasses.join(' ')}
+            draggable="true"
+            onDragStart={dragStarts}
+            onDragLeave={dragLeaveOrEnd}
+            onDragEnd={dragLeaveOrEnd}
+            data-coords={coords}
         >
-            <div
-                style={pieceStyles}
-                className={draggableClasses.join(' ')}
-                draggable="true"
-                onDragStart={dragStarts}
-                onDragLeave={dragLeave}
-                data-coords={coords}
-            >
-                <div class={styles.screen}></div>
+            <div class={styles.screen}>
+                {dragOverCount}
             </div>
         </div>
     )

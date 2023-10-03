@@ -32,11 +32,13 @@
     box-sizing: border-box;
 }
 
-.receiver .screen {
+.screen {
     width: 100%;
     height: 100%;
     background-color: #eef;
-    opacity: 0;
+    padding: 30px;
+    opacity: 0.0;
+    box-sizing: border-box;
 }
 
 .receiver.drag-over .screen{
@@ -48,3 +50,4 @@
 .puzzle.ellenchan .piece { background-image: url('../../public/images/puzzles/ellenchan_crop.jpg') }
 .puzzle.gruendercoach .piece { background-image: url('../../public/images/puzzles/gruendercoach_crop.jpg') }
 .puzzle.kinkate .piece { background-image: url('../../public/images/puzzles/kinkate_mountain_landscape.jpg') }
+.puzzle.princess .piece { background-image: url('../../public/images/puzzles/princess_crop.jpg') }
