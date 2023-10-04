@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Piece from './Piece.js'
 import styles from '../../styles/puzzles.module.css'
 
@@ -11,6 +11,16 @@ const Game = ({ puzzles }) => {
     const [ gridCount, setGridCount] = useState(0)
     const [ selectedPuzzle, setSelectedPuzzle ] = useState(puzzles[3])
     const [ currentSwap, setCurrentSwap ] = useState(null)
+    const [ complete, setComplete ] = useState(false)
+
+    const pieceInPlace = (piece) => piece.pieceCoordY === piece.imageCoordY && piece.pieceCoordX === piece.imageCoordX
+
+    useEffect( () => {
+        const outOfPlace = grid.some(row => row.some(piece => ! pieceInPlace(piece)))
+        if (! outOfPlace) {
+            setComplete(true)
+        }
+    }, [grid])
 
     function getInitialGrid() {
 
@@ -132,6 +142,7 @@ const Game = ({ puzzles }) => {
                 isDragOver={piece.isDragOver}
                 setIsDragOver={setIsDragOver}
                 setCurrentSwap={setCurrentSwap}
+                puzzleComplete={complete}
             />
         })
         const rowKey = String(rowIndex) + String(gridCount)
@@ -152,7 +163,10 @@ const Game = ({ puzzles }) => {
         )
     })
 
-    const puzzleClasses = [styles.puzzle, styles[bgImage]]
+    let puzzleClasses = [styles.puzzle, styles[bgImage]]
+    if (complete) {
+        puzzleClasses.push(styles.complete)
+    }
 
     return (
         <>
@@ -160,10 +174,6 @@ const Game = ({ puzzles }) => {
                 {images}
             </div>
             <div className={puzzleClasses.join(' ')}>{puzzle}</div>
-            { /*
-            <button onClick={change}>Change!</button>
-            <button onClick={revertSwap}>Revert!</button>
-            */ }
         </>
     )
 }

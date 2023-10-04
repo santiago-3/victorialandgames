@@ -14,13 +14,13 @@ const Piece = ({
         isDragOver,
         setIsDragOver,
         setCurrentSwap,
+        puzzleComplete,
     }) => {
 
     const initialClasses = [styles.piece, styles[bgImage]]
     let draggableClasses = initialClasses
     let receiverClasses = [styles.receiver]
     const [dragOverCount, setDragOverCount] = useState(0)
-
 
     const width = 120
     const height = 90
@@ -83,7 +83,7 @@ const Piece = ({
             onDragOver={dragOver}
             style={pieceStyles}
             className={draggableClasses.join(' ')}
-            draggable="true"
+            draggable={! puzzleComplete}
             onDragStart={dragStarts}
             onDragLeave={dragLeaveOrEnd}
             onDragEnd={dragLeaveOrEnd}
